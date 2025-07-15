@@ -50,10 +50,16 @@ const directionSpan = document.getElementById('direction');
 const roomInput = document.getElementById('roomInput');
 const startBtn = document.getElementById('startBtn');
 
-// Load room coordinates
+// Load room coordinates and building graph
+let buildingGraph = {};
+let currentPath = []; // Current escape route
+
 fetch('data/rooms.json')
   .then(r => r.json())
-  .then(json => (rooms = json));
+  .then(json => {
+    buildingGraph = json;
+    rooms = json.nodes; // Backward compatibility
+  });
 
 mapImg.onload = () => draw();
 
@@ -62,7 +68,14 @@ mapImg.onload = () => draw();
 // -----------------------
 function updateUI() {
   stepCountSpan.textContent = user.steps;
-  directionSpan.textContent = Math.round(user.direction) + '°';
+  
+  // Show both compass and movement direction
+  const movementDir = detectMovementDirection();
+  let directionText = Math.round(user.direction) + '°';
+  if (movementDir !== null) {
+    directionText += ` (H:${Math.round(movementDir)}°)`;
+  }
+  directionSpan.textContent = directionText;
   
   // Add walking state indicator
   const walkingIndicator = document.getElementById('walkingState') || createWalkingIndicator();
@@ -90,6 +103,26 @@ function getWalkingStateText() {
   }
 }
 
+// Add calibration button
+function addCalibrationButton() {
+  const calibrateBtn = document.createElement('button');
+  calibrateBtn.textContent = 'Pusulayı Kalibre Et';
+  calibrateBtn.style.cssText = `
+    position: fixed; bottom: 10px; right: 10px; 
+    padding: 10px; background: #ff9800; color: white;
+    border: none; border-radius: 5px; font-size: 12px;
+    z-index: 1000; cursor: pointer;
+  `;
+  calibrateBtn.onclick = () => {
+    alert(`Pusula: ${Math.round(user.direction)}°\nHaritada kuzeye (yukarı) doğru birkaç adım atın ve hareketin doğru olup olmadığını kontrol edin.`);
+    console.log('Compass calibration - walk north (up on map) to test');
+  };
+  document.body.appendChild(calibrateBtn);
+}
+
+// Call after page loads
+window.addEventListener('load', addCalibrationButton);
+
 // Add CSS for walking state indicator
 const style = document.createElement('style');
 style.textContent = `
@@ -103,6 +136,10 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(mapImg, 0, 0, canvas.width, canvas.height);
 
+  // Draw escape route
+  drawEscapeRoute();
+  
+  // Draw user icon
   ctx.save();
   const drawX = user.x === 0 && user.y === 0 ? canvas.width / 2 : user.x;
   const drawY = user.x === 0 && user.y === 0 ? canvas.height / 2 : user.y;
@@ -135,6 +172,11 @@ function setStartRoom(id) {
     const canvasPos = realToCanvas(rooms[id].x, rooms[id].y);
     Object.assign(user, { x: canvasPos.x, y: canvasPos.y, steps: 0 });
     roomNameSpan.textContent = id;
+    
+    // Calculate escape route immediately
+    currentPath = findEscapeRoute(id);
+    console.log('Escape route calculated:', currentPath);
+    
     draw();
   } else {
     alert('Oda bulunamadı!');
@@ -339,14 +381,28 @@ function hasVerticalMotionPattern() {
 
 function onOrient(e) {
   if (typeof e.alpha === 'number') {
-    user.direction = e.alpha;
+    // Fix compass direction - adjust for device orientation and map alignment
+    let correctedDirection = e.alpha;
+    
+    // Calibrate for map orientation (adjust these values based on your map)
+    // Most maps have North pointing up, so 0° should be up on screen
+    correctedDirection = (correctedDirection + 0) % 360; // add offset if needed
+    
+    user.direction = correctedDirection;
     updateUI();
     draw();
   }
 }
 
+// Improved step calculation with movement direction detection
 function stepForward() {
-  const rad = ((user.direction||0)-90)*(Math.PI/180);
+  // Try to detect actual movement direction from accelerometer
+  const movementDirection = detectMovementDirection();
+  
+  // Use movement direction if available, fallback to compass
+  const actualDirection = movementDirection !== null ? movementDirection : user.direction;
+  
+  const rad = ((actualDirection || 0) - 90) * (Math.PI / 180);
   
   // Convert current position to real coordinates
   const realPos = canvasToReal(user.x, user.y);
@@ -365,6 +421,259 @@ function stepForward() {
   user.steps++;
   updateUI();
   draw();
+  
+  console.log(`Step: compass=${user.direction}°, movement=${movementDirection}°, used=${actualDirection}°`);
+}
+
+// Detect movement direction from accelerometer data
+function detectMovementDirection() {
+  if (accBuffer.length < 8) return null;
+  
+  // Get recent acceleration data
+  const recent = accBuffer.slice(-8);
+  
+  // Calculate average acceleration direction
+  let totalX = 0, totalY = 0;
+  let validSamples = 0;
+  
+  for (let i = 1; i < recent.length; i++) {
+    const curr = recent[i];
+    const prev = recent[i-1];
+    
+    // Calculate acceleration delta (movement vector)
+    const deltaX = curr.x - prev.x;
+    const deltaY = curr.y - prev.y;
+    const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    // Only use significant movements
+    if (magnitude > 0.5) {
+      totalX += deltaX;
+      totalY += deltaY;
+      validSamples++;
+    }
+  }
+  
+  if (validSamples < 3) return null;
+  
+  // Calculate average direction
+  const avgX = totalX / validSamples;
+  const avgY = totalY / validSamples;
+  
+  // Convert to degrees (0° = up, 90° = right, etc.)
+  let direction = Math.atan2(avgY, avgX) * (180 / Math.PI);
+  direction = (direction + 90) % 360; // adjust for screen coordinates
+  if (direction < 0) direction += 360;
+  
+  return direction;
+}
+
+// Add compass calibration helper
+function calibrateCompass() {
+  // You can call this to check if compass needs adjustment
+  console.log('Current compass:', user.direction);
+  console.log('Take a few steps north (up on map) and check if movement matches');
+}
+
+// Dijkstra algorithm for shortest path to nearest exit
+function findEscapeRoute(startNodeId) {
+  if (!buildingGraph.nodes || !buildingGraph.edges) {
+    console.log('Building graph not loaded yet');
+    return [];
+  }
+  
+  const nodes = buildingGraph.nodes;
+  const edges = buildingGraph.edges;
+  
+  // Find all exits
+  const exits = Object.keys(nodes).filter(id => nodes[id].type === 'exit');
+  if (exits.length === 0) return [];
+  
+  // Dijkstra implementation
+  const distances = {};
+  const previous = {};
+  const unvisited = new Set();
+  
+  // Initialize distances
+  Object.keys(nodes).forEach(nodeId => {
+    distances[nodeId] = Infinity;
+    previous[nodeId] = null;
+    unvisited.add(nodeId);
+  });
+  
+  distances[startNodeId] = 0;
+  
+  while (unvisited.size > 0) {
+    // Find unvisited node with minimum distance
+    let currentNode = null;
+    let minDistance = Infinity;
+    
+    for (const nodeId of unvisited) {
+      if (distances[nodeId] < minDistance) {
+        minDistance = distances[nodeId];
+        currentNode = nodeId;
+      }
+    }
+    
+    if (currentNode === null || minDistance === Infinity) break;
+    
+    unvisited.delete(currentNode);
+    
+    // Check if we reached an exit
+    if (nodes[currentNode].type === 'exit') {
+      // Reconstruct path
+      const path = [];
+      let node = currentNode;
+      while (node !== null) {
+        path.unshift(node);
+        node = previous[node];
+      }
+      return path;
+    }
+    
+    // Update distances to neighbors
+    edges.forEach(([nodeA, nodeB, weight]) => {
+      const neighbor = nodeA === currentNode ? nodeB : (nodeB === currentNode ? nodeA : null);
+      if (neighbor && unvisited.has(neighbor)) {
+        const newDistance = distances[currentNode] + weight;
+        if (newDistance < distances[neighbor]) {
+          distances[neighbor] = newDistance;
+          previous[neighbor] = currentNode;
+        }
+      }
+    });
+  }
+  
+  return []; // No path found
+}
+
+// Draw the escape route on the map
+function drawEscapeRoute() {
+  if (!currentPath || currentPath.length < 2) return;
+  
+  ctx.save();
+  
+  // Draw route line
+  ctx.strokeStyle = '#ff4444';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  
+  // Add glow effect
+  ctx.shadowColor = '#ff4444';
+  ctx.shadowBlur = 8;
+  
+  ctx.beginPath();
+  
+  for (let i = 0; i < currentPath.length; i++) {
+    const nodeId = currentPath[i];
+    const node = rooms[nodeId];
+    if (!node) continue;
+    
+    const canvasPos = realToCanvas(node.x, node.y);
+    
+    if (i === 0) {
+      ctx.moveTo(canvasPos.x, canvasPos.y);
+    } else {
+      ctx.lineTo(canvasPos.x, canvasPos.y);
+    }
+  }
+  
+  ctx.stroke();
+  
+  // Draw route waypoints
+  ctx.shadowBlur = 0;
+  currentPath.forEach((nodeId, index) => {
+    const node = rooms[nodeId];
+    if (!node) return;
+    
+    const canvasPos = realToCanvas(node.x, node.y);
+    
+    ctx.beginPath();
+    ctx.arc(canvasPos.x, canvasPos.y, 6, 0, 2 * Math.PI);
+    
+    if (node.type === 'exit') {
+      ctx.fillStyle = '#ff4444';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Exit label
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('EXIT', canvasPos.x, canvasPos.y + 15);
+    } else if (index === 0) {
+      ctx.fillStyle = '#4caf50';
+      ctx.fill();
+    } else {
+      ctx.fillStyle = '#ffeb3b';
+      ctx.fill();
+      ctx.strokeStyle = '#f57c00';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  });
+  
+  ctx.restore();
+}
+
+// Update route when user moves
+function stepForward() {
+  // Try to detect actual movement direction from accelerometer
+  const movementDirection = detectMovementDirection();
+  
+  // Use movement direction if available, fallback to compass
+  const actualDirection = movementDirection !== null ? movementDirection : user.direction;
+  
+  const rad = ((actualDirection || 0) - 90) * (Math.PI / 180);
+  
+  // Convert current position to real coordinates
+  const realPos = canvasToReal(user.x, user.y);
+  
+  // Move in real coordinates (meters)
+  const newRealX = realPos.x + Math.cos(rad) * user.stepLength;
+  const newRealY = realPos.y + Math.sin(rad) * user.stepLength;
+  
+  // Convert back to canvas coordinates
+  const newCanvasPos = realToCanvas(newRealX, newRealY);
+  
+  // Clamp to canvas bounds
+  user.x = Math.max(0, Math.min(canvas.width, newCanvasPos.x));
+  user.y = Math.max(0, Math.min(canvas.height, newCanvasPos.y));
+  
+  user.steps++;
+  updateUI();
+  draw();
+  
+  console.log(`Step: compass=${user.direction}°, movement=${movementDirection}°, used=${actualDirection}°`);
+  
+  // Recalculate route if user has moved significantly
+  const userRealPos = canvasToReal(user.x, user.y);
+  const nearestNode = findNearestNode(userRealPos.x, userRealPos.y);
+  
+  if (nearestNode && currentPath[0] !== nearestNode) {
+    currentPath = findEscapeRoute(nearestNode);
+    console.log('Route updated for new position:', nearestNode);
+  }
+}
+
+// Find nearest graph node to current position
+function findNearestNode(realX, realY) {
+  let nearestNode = null;
+  let minDistance = Infinity;
+  
+  Object.keys(rooms).forEach(nodeId => {
+    const node = rooms[nodeId];
+    const distance = Math.sqrt((node.x - realX) ** 2 + (node.y - realY) ** 2);
+    
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestNode = nodeId;
+    }
+  });
+  
+  return nearestNode;
 }
 
 // PWA SW
