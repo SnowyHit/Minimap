@@ -37,12 +37,42 @@ function setStartRoom(room) {
 
 startBtn.onclick = () => {
   setStartRoom(roomInput.value.trim());
+  requestSensorPermissions();
 };
 
-// Adım algılama (basit örnek, geliştirmeye açık)
-let lastAcc = 0;
-let stepThreshold = 10; // ivme eşiği
-window.addEventListener('devicemotion', (e) => {
+function requestSensorPermissions() {
+  // iOS 13+ requires explicit permission for motion/orientation
+  let permissionNeeded = typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function';
+  let orientationPermissionNeeded = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
+
+  if (permissionNeeded || orientationPermissionNeeded) {
+    Promise.all([
+      permissionNeeded ? DeviceMotionEvent.requestPermission() : Promise.resolve('granted'),
+      orientationPermissionNeeded ? DeviceOrientationEvent.requestPermission() : Promise.resolve('granted')
+    ]).then(results => {
+      if (results.every(r => r === 'granted')) {
+        addSensorListeners();
+      } else {
+        alert('Cihaz hareket/yön sensörlerine izin verilmedi. Konum ve yön güncellenemez.');
+      }
+    }).catch(() => {
+      alert('Cihaz hareket/yön sensörlerine izin verilmedi. Konum ve yön güncellenemez.');
+    });
+  } else {
+    // Most Android/desktop browsers: no permission needed
+    addSensorListeners();
+  }
+}
+
+let sensorsAdded = false;
+function addSensorListeners() {
+  if (sensorsAdded) return;
+  sensorsAdded = true;
+  window.addEventListener('devicemotion', handleDeviceMotion);
+  window.addEventListener('deviceorientation', handleDeviceOrientation);
+}
+
+function handleDeviceMotion(e) {
   if (!e.accelerationIncludingGravity) return;
   let acc = e.accelerationIncludingGravity;
   let totalAcc = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
@@ -52,15 +82,18 @@ window.addEventListener('devicemotion', (e) => {
     updateUI();
   }
   lastAcc = totalAcc;
-});
+}
 
-// Compass/yön algılama
-window.addEventListener('deviceorientation', (e) => {
+function handleDeviceOrientation(e) {
   if (typeof e.alpha === 'number') {
     user.direction = e.alpha;
     updateUI();
+    draw();
   }
-});
+}
+// Remove old event listeners (if any)
+window.removeEventListener('devicemotion', handleDeviceMotion);
+window.removeEventListener('deviceorientation', handleDeviceOrientation);
 
 function moveUser() {
   // Yönü derece olarak kullan, adım uzunluğunda ilerle
@@ -75,8 +108,18 @@ function draw() {
   ctx.drawImage(mapImg, 0, 0, canvas.width, canvas.height);
   // Kullanıcı simgesi (daire + ok)
   ctx.save();
-  ctx.translate(user.x, user.y);
+  // Fallback: if user is at (0,0), draw at center
+  let drawX = user.x === 0 && user.y === 0 ? canvas.width / 2 : user.x;
+  let drawY = user.x === 0 && user.y === 0 ? canvas.height / 2 : user.y;
+  ctx.translate(drawX, drawY);
   ctx.rotate((user.direction - 90) * Math.PI / 180);
+  // Debug border for visibility
+  ctx.beginPath();
+  ctx.arc(0, 0, 18, 0, 2 * Math.PI);
+  ctx.strokeStyle = '#ff9800';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Main user icon
   ctx.beginPath();
   ctx.arc(0, 0, 16, 0, 2 * Math.PI);
   ctx.fillStyle = '#1976d2';
