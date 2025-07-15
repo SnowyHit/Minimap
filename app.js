@@ -1,5 +1,5 @@
 let mapImg = new Image();
-mapImg.src = 'map.png'; // PNG harita dosyası (placeholder, eklenmeli)
+mapImg.src = 'mapreal.jpeg'; // PNG harita dosyası (placeholder, eklenmeli)
 
 let rooms = {};
 let user = {

@@ -1,1 +1,20 @@
-body { background: #f7f7f7; font-family: Arial, sans-serif; margin: 0; }\n#app { max-width: 900px; margin: 30px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #0001; }\nh1 { text-align: center; }\n#mapCanvas { display: block; margin: 20px auto; border: 2px solid #ccc; border-radius: 8px; background: #e9ecef; }\n#info { display: flex; justify-content: center; gap: 30px; margin-bottom: 16px; font-size: 1.1em; }\n#qrInput { text-align: center; margin-bottom: 10px; }\n#qrInput input { width: 100px; padding: 4px; font-size: 1em; }\n#qrInput button { padding: 4px 12px; font-size: 1em; cursor: pointer; } 
+body { background: #f7f7f7; font-family: Arial, sans-serif; margin: 0; }
+#app { max-width: 900px; margin: 30px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #0002; }
+h1 { text-align: center; font-size: 2.1em; color: #1a237e; margin-bottom: 18px; }
+#mapCanvas { display: block; margin: 20px auto; border: 3px solid #1976d2; border-radius: 10px; background: #e9ecef; box-shadow: 0 1px 8px #0001; }
+#infoCard { background: #f1f5fb; border: 2px solid #1976d2; border-radius: 10px; margin: 0 auto 18px auto; max-width: 500px; box-shadow: 0 1px 6px #0001; padding: 12px 0; }
+#info { display: flex; justify-content: space-around; gap: 18px; font-size: 1.3em; font-weight: bold; color: #1a237e; }
+.info-block { display: flex; flex-direction: column; align-items: center; }
+.info-label { font-size: 0.95em; color: #1976d2; font-weight: normal; margin-bottom: 2px; }
+#qrInputSection { text-align: center; margin-bottom: 16px; }
+#qrInputSection label { font-size: 1.1em; color: #333; margin-right: 8px; }
+#roomInput { width: 110px; padding: 7px; font-size: 1.1em; border: 1.5px solid #1976d2; border-radius: 6px; margin-right: 8px; }
+#startBtn { padding: 7px 18px; font-size: 1.1em; background: #1976d2; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+#startBtn:hover, #startBtn:focus { background: #0d47a1; }
+@media (max-width: 600px) {
+  #app { padding: 6px; }
+  #mapCanvas { width: 98vw; height: 60vw; max-width: 100%; }
+  #infoCard { max-width: 98vw; }
+  #info { font-size: 1em; gap: 8px; }
+  #qrInputSection label, #roomInput, #startBtn { font-size: 1em; }
+} 
