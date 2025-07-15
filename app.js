@@ -66,8 +66,15 @@ function requestSensorPermissions() {
 
 let sensorsAdded = false;
 let lastAcc = 0;
-let stepThreshold = 3; // ivme eşiği (daha hassas)
+let stepThreshold = 1.2; // z-axis threshold (tuned for walking)
+let lastStepTime = 0;
+const minStepInterval = 350; // ms, minimum time between steps
 let motionEventReceived = false;
+
+// Dead reckoning variables
+let velocity = { x: 0, y: 0 };
+let lastMotionTimestamp = null;
+const velocityDamping = 0.98; // Damping factor to reduce drift
 
 function addSensorListeners() {
   if (sensorsAdded) return;
@@ -82,14 +89,39 @@ function handleDeviceMotion(e) {
   motionEventReceived = true;
   if (!e.accelerationIncludingGravity) return;
   let acc = e.accelerationIncludingGravity;
-  let totalAcc = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
-  console.log('devicemotion:', {acc, totalAcc, lastAcc});
-  if (lastAcc && totalAcc - lastAcc > stepThreshold) {
-    user.steps++;
-    moveUser();
-    updateUI();
+  let now = e.timeStamp || Date.now();
+
+  // Use only x/y acceleration (ignore gravity as much as possible)
+  let ax = acc.x || 0;
+  let ay = acc.y || 0;
+
+  // Estimate delta time (in seconds)
+  let dt = 0.05; // default to 50ms
+  if (lastMotionTimestamp !== null) {
+    dt = Math.min((now - lastMotionTimestamp) / 1000, 0.2); // cap at 200ms
   }
-  lastAcc = totalAcc;
+  lastMotionTimestamp = now;
+
+  // Update velocity (simple integration)
+  velocity.x += ax * dt;
+  velocity.y += ay * dt;
+
+  // Damping to reduce drift
+  velocity.x *= velocityDamping;
+  velocity.y *= velocityDamping;
+
+  // Update user position (simple integration)
+  user.x += velocity.x * 50; // scale for visible movement
+  user.y += velocity.y * 50;
+
+  // Clamp user position to canvas bounds
+  user.x = Math.max(0, Math.min(canvas.width, user.x));
+  user.y = Math.max(0, Math.min(canvas.height, user.y));
+
+  updateUI();
+  draw();
+  // Debug log
+  console.log('motion', {ax, ay, dt, velocity: {...velocity}, user: {x: user.x, y: user.y}});
 }
 
 function handleDeviceOrientation(e) {
