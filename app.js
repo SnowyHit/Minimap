@@ -65,17 +65,25 @@ function requestSensorPermissions() {
 }
 
 let sensorsAdded = false;
+let lastAcc = 0;
+let stepThreshold = 3; // ivme eşiği (daha hassas)
+let motionEventReceived = false;
+
 function addSensorListeners() {
   if (sensorsAdded) return;
   sensorsAdded = true;
   window.addEventListener('devicemotion', handleDeviceMotion);
   window.addEventListener('deviceorientation', handleDeviceOrientation);
+  motionEventReceived = false;
+  checkMotionEventReceived();
 }
 
 function handleDeviceMotion(e) {
+  motionEventReceived = true;
   if (!e.accelerationIncludingGravity) return;
   let acc = e.accelerationIncludingGravity;
   let totalAcc = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
+  console.log('devicemotion:', {acc, totalAcc, lastAcc});
   if (lastAcc && totalAcc - lastAcc > stepThreshold) {
     user.steps++;
     moveUser();
@@ -136,6 +144,15 @@ function draw() {
 function updateUI() {
   stepCountSpan.textContent = user.steps;
   directionSpan.textContent = Math.round(user.direction) + '°';
+}
+
+// Uyarı: Eğer 5 saniye içinde devicemotion alınmazsa kullanıcıya bildir
+function checkMotionEventReceived() {
+  setTimeout(() => {
+    if (!motionEventReceived) {
+      alert('Cihazdan hareket verisi alınamıyor. Lütfen hareket izinlerini kontrol edin veya tarayıcıyı değiştirin.');
+    }
+  }, 5000);
 }
 
 // PWA: Service worker kaydı
