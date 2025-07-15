@@ -65,16 +65,13 @@ function requestSensorPermissions() {
 }
 
 let sensorsAdded = false;
+// Remove dead reckoning variables and logic
+// Step detection variables
 let lastAcc = 0;
 let stepThreshold = 1.2; // z-axis threshold (tuned for walking)
 let lastStepTime = 0;
 const minStepInterval = 350; // ms, minimum time between steps
 let motionEventReceived = false;
-
-// Dead reckoning variables
-let velocity = { x: 0, y: 0 };
-let lastMotionTimestamp = null;
-const velocityDamping = 0.98; // Damping factor to reduce drift
 
 function addSensorListeners() {
   if (sensorsAdded) return;
@@ -89,39 +86,22 @@ function handleDeviceMotion(e) {
   motionEventReceived = true;
   if (!e.accelerationIncludingGravity) return;
   let acc = e.accelerationIncludingGravity;
-  let now = e.timeStamp || Date.now();
-
-  // Use only x/y acceleration (ignore gravity as much as possible)
-  let ax = acc.x || 0;
-  let ay = acc.y || 0;
-
-  // Estimate delta time (in seconds)
-  let dt = 0.05; // default to 50ms
-  if (lastMotionTimestamp !== null) {
-    dt = Math.min((now - lastMotionTimestamp) / 1000, 0.2); // cap at 200ms
+  let z = acc.z || 0;
+  let now = Date.now();
+  // Only count a step if enough time has passed and z-axis spike detected
+  if (
+    lastAcc !== 0 &&
+    Math.abs(z - lastAcc) > stepThreshold &&
+    (now - lastStepTime) > minStepInterval
+  ) {
+    user.steps++;
+    moveUser();
+    updateUI();
+    lastStepTime = now;
   }
-  lastMotionTimestamp = now;
-
-  // Update velocity (simple integration)
-  velocity.x += ax * dt;
-  velocity.y += ay * dt;
-
-  // Damping to reduce drift
-  velocity.x *= velocityDamping;
-  velocity.y *= velocityDamping;
-
-  // Update user position (simple integration)
-  user.x += velocity.x * 50; // scale for visible movement
-  user.y += velocity.y * 50;
-
-  // Clamp user position to canvas bounds
-  user.x = Math.max(0, Math.min(canvas.width, user.x));
-  user.y = Math.max(0, Math.min(canvas.height, user.y));
-
-  updateUI();
-  draw();
+  lastAcc = z;
   // Debug log
-  console.log('motion', {ax, ay, dt, velocity: {...velocity}, user: {x: user.x, y: user.y}});
+  console.log('step-detect', {z, lastAcc, steps: user.steps});
 }
 
 function handleDeviceOrientation(e) {
@@ -136,10 +116,13 @@ window.removeEventListener('devicemotion', handleDeviceMotion);
 window.removeEventListener('deviceorientation', handleDeviceOrientation);
 
 function moveUser() {
-  // Yönü derece olarak kullan, adım uzunluğunda ilerle
-  let rad = (user.direction - 90) * Math.PI / 180; // 0 derece yukarı olsun
+  // Move in the direction the user is facing
+  let rad = (user.direction - 90) * Math.PI / 180; // 0 degree = up
   user.x += Math.cos(rad) * user.stepLength;
   user.y += Math.sin(rad) * user.stepLength;
+  // Clamp to canvas
+  user.x = Math.max(0, Math.min(canvas.width, user.x));
+  user.y = Math.max(0, Math.min(canvas.height, user.y));
   draw();
 }
 
