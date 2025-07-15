@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Otel Yönlendirme Sistemi</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <h1>Otel Yönlendirme Sistemi</h1>
+    <canvas id="mapCanvas" width="800" height="600"></canvas>
+    <div id="info">
+      <span>Oda: <span id="roomName">-</span></span>
+      <span>Adım: <span id="stepCount">0</span></span>
+      <span>Yön: <span id="direction">-</span></span>
+    </div>
+    <div id="qrInput">
+      <label>Başlangıç Odası (QR simülasyonu): <input type="text" id="roomInput" placeholder="ör. 3401"><button id="startBtn">Başla</button></label>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html> 
