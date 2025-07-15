@@ -63,7 +63,41 @@ mapImg.onload = () => draw();
 function updateUI() {
   stepCountSpan.textContent = user.steps;
   directionSpan.textContent = Math.round(user.direction) + '°';
+  
+  // Add walking state indicator
+  const walkingIndicator = document.getElementById('walkingState') || createWalkingIndicator();
+  walkingIndicator.textContent = getWalkingStateText();
+  walkingIndicator.className = `walking-state ${walkingState}`;
 }
+
+function createWalkingIndicator() {
+  const indicator = document.createElement('div');
+  indicator.id = 'walkingState';
+  indicator.style.cssText = `
+    position: fixed; top: 10px; right: 10px; 
+    padding: 8px 12px; border-radius: 20px; font-size: 12px;
+    font-weight: bold; color: white; z-index: 1000;
+  `;
+  document.body.appendChild(indicator);
+  return indicator;
+}
+
+function getWalkingStateText() {
+  switch(walkingState) {
+    case 'walking': return '🚶 Yürüyor';
+    case 'maybe_walking': return '❓ Belki yürüyor';
+    default: return '⏸️ Duruyor';
+  }
+}
+
+// Add CSS for walking state indicator
+const style = document.createElement('style');
+style.textContent = `
+  .walking-state.stationary { background: #757575; }
+  .walking-state.maybe_walking { background: #ff9800; }
+  .walking-state.walking { background: #4caf50; }
+`;
+document.head.appendChild(style);
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -172,13 +206,17 @@ function addKeyboardControls() {
   console.log('Klavye kontrolları aktif: WASD tuşlarını kullanın');
 }
 
-// Dead-reckoning
+// Dead-reckoning with improved step detection
 let sensorsAdded = false;
-const buf = [];
+const accBuffer = []; // acceleration history for filtering
+const magBuffer = []; // magnitude history for pattern detection
 let lastStep = 0;
-const STEP_THR = 1.2;
-const STEP_MIN_MS = 350;
+const STEP_THR = 2.5; // higher threshold to avoid false positives
+const STEP_MIN_MS = 400; // longer minimum interval between steps
+const STEP_MAX_MS = 2000; // maximum interval for valid walking
 let motionOK = false;
+let consecutiveSteps = 0; // track walking pattern
+let walkingState = 'stationary'; // 'stationary', 'maybe_walking', 'walking'
 
 function addSensorListeners() {
   if (sensorsAdded) return;
@@ -193,15 +231,110 @@ function addSensorListeners() {
 function onMotion(e) {
   motionOK = true;
   const a = e.accelerationIncludingGravity || {};
+  
+  // Calculate total acceleration magnitude
   const mag = Math.sqrt((a.x||0)**2 + (a.y||0)**2 + (a.z||0)**2);
-  buf.push(mag);
-  if (buf.length > 4) buf.shift();
-  const avg = buf.reduce((s,v)=>s+v,0)/buf.length - 9.81;
-  const now = e.timeStamp || Date.now();
-  if (avg > STEP_THR && now - lastStep > STEP_MIN_MS) {
-    lastStep = now;
-    stepForward();
+  
+  // Add to buffers
+  accBuffer.push({ x: a.x||0, y: a.y||0, z: a.z||0, time: Date.now() });
+  magBuffer.push(mag);
+  
+  // Keep buffers at reasonable size
+  if (accBuffer.length > 20) accBuffer.shift();
+  if (magBuffer.length > 10) magBuffer.shift();
+  
+  // Need enough samples for analysis
+  if (magBuffer.length < 6) return;
+  
+  // Calculate filtered magnitude (remove gravity)
+  const avgMag = magBuffer.reduce((s,v)=>s+v,0) / magBuffer.length;
+  const filteredMag = Math.abs(mag - 9.81); // remove gravity component
+  
+  // Advanced step detection
+  if (isValidStep(filteredMag, avgMag)) {
+    const now = Date.now();
+    if (now - lastStep > STEP_MIN_MS && now - lastStep < STEP_MAX_MS) {
+      lastStep = now;
+      consecutiveSteps++;
+      
+      // Update walking state
+      if (consecutiveSteps >= 2) {
+        walkingState = 'walking';
+        stepForward();
+        console.log('Valid step detected - walking confirmed');
+      } else if (consecutiveSteps === 1) {
+        walkingState = 'maybe_walking';
+        console.log('Possible step - waiting for confirmation');
+      }
+    }
+  } else {
+    // Reset walking state if no valid steps detected
+    if (Date.now() - lastStep > STEP_MAX_MS) {
+      consecutiveSteps = 0;
+      walkingState = 'stationary';
+    }
   }
+}
+
+// Improved step validation
+function isValidStep(filteredMag, avgMag) {
+  // Must exceed threshold
+  if (filteredMag < STEP_THR) return false;
+  
+  // Check for walking pattern characteristics
+  const recent = magBuffer.slice(-6);
+  
+  // Calculate variance to detect repetitive motion
+  const variance = calculateVariance(recent);
+  
+  // Walking has moderate variance (not too erratic, not too steady)
+  if (variance < 0.5 || variance > 8.0) return false;
+  
+  // Check for periodic pattern (walking is rhythmic)
+  if (!hasWalkingRhythm()) return false;
+  
+  // Check acceleration direction changes (walking has up/down motion)
+  if (!hasVerticalMotionPattern()) return false;
+  
+  return true;
+}
+
+function calculateVariance(values) {
+  const avg = values.reduce((s,v)=>s+v,0) / values.length;
+  return values.reduce((s,v)=>s+(v-avg)**2,0) / values.length;
+}
+
+function hasWalkingRhythm() {
+  if (accBuffer.length < 10) return false;
+  
+  // Check for alternating peaks and valleys in acceleration
+  const recent = accBuffer.slice(-10);
+  let peaks = 0;
+  let valleys = 0;
+  
+  for (let i = 1; i < recent.length - 1; i++) {
+    const curr = Math.sqrt(recent[i].x**2 + recent[i].y**2 + recent[i].z**2);
+    const prev = Math.sqrt(recent[i-1].x**2 + recent[i-1].y**2 + recent[i-1].z**2);
+    const next = Math.sqrt(recent[i+1].x**2 + recent[i+1].y**2 + recent[i+1].z**2);
+    
+    if (curr > prev && curr > next) peaks++;
+    if (curr < prev && curr < next) valleys++;
+  }
+  
+  // Walking should have alternating peaks and valleys
+  return peaks >= 1 && valleys >= 1;
+}
+
+function hasVerticalMotionPattern() {
+  if (accBuffer.length < 5) return false;
+  
+  // Check for vertical (z-axis) motion characteristic of walking
+  const recent = accBuffer.slice(-5);
+  const zValues = recent.map(a => a.z);
+  const zVariance = calculateVariance(zValues);
+  
+  // Walking has noticeable vertical motion
+  return zVariance > 1.0;
 }
 
 function onOrient(e) {
