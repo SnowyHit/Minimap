@@ -39,43 +39,71 @@ function logDebug(msg) {
   }
 }
 
+// Dead reckoning variables
+let drVelocity = { x: 0, y: 0 };
+let drPosition = { x: 0, y: 0 };
+let drLastTimestamp = null;
+const drDamping = 0.98;
+
+function updateDebugStatus({
+  gpsLat, gpsLon, gpsX, gpsY, drX, drY, moveM, moveRot, status
+}) {
+  if (gpsLat !== undefined && gpsLon !== undefined) {
+    document.getElementById('dbgGpsLatLon').textContent = `${gpsLat?.toFixed(6)}, ${gpsLon?.toFixed(6)}`;
+  }
+  if (gpsX !== undefined && gpsY !== undefined) {
+    document.getElementById('dbgGpsXY').textContent = `${gpsX?.toFixed(1)}, ${gpsY?.toFixed(1)}`;
+  }
+  if (drX !== undefined && drY !== undefined) {
+    document.getElementById('dbgDrXY').textContent = `${drX?.toFixed(2)}, ${drY?.toFixed(2)}`;
+  }
+  if (moveM !== undefined) {
+    document.getElementById('dbgMoveM').textContent = `${moveM?.toFixed(3)}`;
+  }
+  if (moveRot !== undefined) {
+    document.getElementById('dbgMoveRot').textContent = `${moveRot?.toFixed(1)}`;
+  }
+  if (status !== undefined) {
+    document.getElementById('dbgStatusMsg').textContent = status;
+  }
+}
+
 function latLonToXY(lat, lon) {
   // Linear interpolation between reference points
   const x = ((lon - MAP_TOPLEFT.lon) / (MAP_BOTTOMRIGHT.lon - MAP_TOPLEFT.lon)) * canvas.width;
   const y = ((MAP_TOPLEFT.lat - lat) / (MAP_TOPLEFT.lat - MAP_BOTTOMRIGHT.lat)) * canvas.height;
-  logDebug(`latLonToXY: lat=${lat}, lon=${lon} => x=${x.toFixed(2)}, y=${y.toFixed(2)}`);
+  updateDebugStatus({ gpsLat: lat, gpsLon: lon, gpsX: x, gpsY: y });
   return { x, y };
 }
 
 function startGPS() {
   if (!navigator.geolocation) {
     alert('Cihazınızda GPS desteği yok.');
-    logDebug('GPS not supported.');
+    updateDebugStatus({ status: 'GPS not supported.' });
     return;
   }
   if (gpsWatchId !== null) {
     navigator.geolocation.clearWatch(gpsWatchId);
-    logDebug('Cleared previous GPS watch.');
+    updateDebugStatus({ status: 'Cleared previous GPS watch.' });
   }
   gpsWatchId = navigator.geolocation.watchPosition(
     (pos) => {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
-      logDebug(`GPS update: lat=${lat}, lon=${lon}`);
       const { x, y } = latLonToXY(lat, lon);
       user.x = Math.max(0, Math.min(canvas.width, x));
       user.y = Math.max(0, Math.min(canvas.height, y));
-      logDebug(`Mapped to canvas: x=${user.x.toFixed(2)}, y=${user.y.toFixed(2)}`);
+      updateDebugStatus({ status: 'GPS update received.' });
       updateUI();
       draw();
     },
     (err) => {
       alert('Konum alınamadı: ' + err.message);
-      logDebug('GPS error: ' + err.message);
+      updateDebugStatus({ status: 'GPS error: ' + err.message });
     },
     { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
   );
-  logDebug('Started GPS tracking.');
+  updateDebugStatus({ status: 'Started GPS tracking.' });
 }
 
 // Override setStartRoom to start GPS tracking
@@ -134,35 +162,37 @@ function addSensorListeners() {
   checkMotionEventReceived();
 }
 
+// Dead reckoning from devicemotion
 function handleDeviceMotion(e) {
-  motionEventReceived = true;
   if (!e.accelerationIncludingGravity) return;
   let acc = e.accelerationIncludingGravity;
-  let z = acc.z || 0;
-  let now = Date.now();
-
-  // Band-pass filter: only consider changes within a reasonable range
-  let dz = z - lastZ;
-  lastZ = z;
-
-  // Step detection state machine
-  if (stepState === 0) {
-    // Look for upward peak
-    if (dz > stepThreshold && (now - lastStepTime) > minStepInterval) {
-      stepState = 1;
-    }
-  } else if (stepState === 1) {
-    // Look for downward valley
-    if (dz < -stepThreshold && (now - lastStepTime) > minStepInterval && (now - lastStepTime) < maxStepInterval) {
-      user.steps++;
-      moveUser();
-      updateUI();
-      lastStepTime = now;
-      stepState = 0;
-    }
+  let now = e.timeStamp || Date.now();
+  let ax = acc.x || 0;
+  let ay = acc.y || 0;
+  let dt = 0.05;
+  if (drLastTimestamp !== null) {
+    dt = Math.min((now - drLastTimestamp) / 1000, 0.2);
   }
-  // Debug log
-  // console.log('step+heading', {z, dz, stepState, steps: user.steps});
+  drLastTimestamp = now;
+  // Integrate acceleration to velocity
+  drVelocity.x += ax * dt;
+  drVelocity.y += ay * dt;
+  // Damping
+  drVelocity.x *= drDamping;
+  drVelocity.y *= drDamping;
+  // Integrate velocity to position (meters)
+  drPosition.x += drVelocity.x * dt;
+  drPosition.y += drVelocity.y * dt;
+  // Predicted movement (meters) and rotation (degrees)
+  const moveM = Math.sqrt(drVelocity.x ** 2 + drVelocity.y ** 2) * dt;
+  const moveRot = Math.atan2(drVelocity.y, drVelocity.x) * 180 / Math.PI;
+  updateDebugStatus({
+    drX: drPosition.x,
+    drY: drPosition.y,
+    moveM,
+    moveRot,
+    status: 'Dead reckoning update.'
+  });
 }
 
 function handleDeviceOrientation(e) {

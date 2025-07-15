@@ -25,8 +25,17 @@
     </section>
   </div>
   <div id="debugPanel" style="max-width:900px;margin:20px auto 0 auto;padding:10px;background:#222;color:#fff;font-size:0.95em;border-radius:8px;min-height:60px;white-space:pre-wrap;overflow-x:auto;">
-    <b>Debug Log:</b>
-    <div id="debugLog"></div>
+    <b>Debug Status:</b>
+    <table id="debugStatusTable" style="width:100%;margin-top:8px;border-collapse:collapse;">
+      <tbody>
+        <tr><td>GPS Lat/Lon</td><td id="dbgGpsLatLon">-</td></tr>
+        <tr><td>GPS Canvas X/Y</td><td id="dbgGpsXY">-</td></tr>
+        <tr><td>Dead Reckoning X/Y (m)</td><td id="dbgDrXY">-</td></tr>
+        <tr><td>Predicted Movement (m)</td><td id="dbgMoveM">-</td></tr>
+        <tr><td>Movement Rotation (°)</td><td id="dbgMoveRot">-</td></tr>
+        <tr><td>Status</td><td id="dbgStatusMsg">-</td></tr>
+      </tbody>
+    </table>
   </div>
   <script src="app.js"></script>
 </body>
