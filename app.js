@@ -23,25 +23,50 @@ fetch('rooms.json').then(r => r.json()).then(data => { rooms = data; });
 
 mapImg.onload = () => draw();
 
-// Real-world movement estimation (dead reckoning)
-let velocity = { x: 0, y: 0 };
-let position = { x: 0, y: 0 };
-let lastMotionTimestamp = null;
-const velocityDamping = 0.98; // Damping to reduce drift
-const metersToPixelsX = canvas.width / 10; // 10 meters = full width
-const metersToPixelsY = canvas.height / 10; // 10 meters = full height
+// GPS-based movement
+// Define GPS coordinates for top-left and bottom-right of the map (example values, replace with real ones)
+const MAP_TOPLEFT = { lat: 40.000000, lon: 29.000000 };
+const MAP_BOTTOMRIGHT = { lat: 39.999000, lon: 29.001000 };
+let gpsWatchId = null;
 
+function latLonToXY(lat, lon) {
+  // Linear interpolation between reference points
+  const x = ((lon - MAP_TOPLEFT.lon) / (MAP_BOTTOMRIGHT.lon - MAP_TOPLEFT.lon)) * canvas.width;
+  const y = ((MAP_TOPLEFT.lat - lat) / (MAP_TOPLEFT.lat - MAP_BOTTOMRIGHT.lat)) * canvas.height;
+  return { x, y };
+}
+
+function startGPS() {
+  if (!navigator.geolocation) {
+    alert('Cihazınızda GPS desteği yok.');
+    return;
+  }
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+  }
+  gpsWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const { x, y } = latLonToXY(lat, lon);
+      user.x = Math.max(0, Math.min(canvas.width, x));
+      user.y = Math.max(0, Math.min(canvas.height, y));
+      updateUI();
+      draw();
+    },
+    (err) => {
+      alert('Konum alınamadı: ' + err.message);
+    },
+    { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+  );
+}
+
+// Override setStartRoom to start GPS tracking
 function setStartRoom(room) {
   if (rooms[room]) {
-    // Start at room position (in pixels)
-    user.x = rooms[room].x;
-    user.y = rooms[room].y;
     user.steps = 0;
-    // Reset dead reckoning
-    velocity = { x: 0, y: 0 };
-    position = { x: 0, y: 0 };
-    lastMotionTimestamp = null;
     roomNameSpan.textContent = room;
+    startGPS();
     draw();
   } else {
     alert('Oda bulunamadı!');
@@ -81,9 +106,6 @@ let sensorsAdded = false;
 // Remove dead reckoning variables and logic
 // Step detection variables
 let lastAcc = 0;
-let stepThreshold = 1.2; // z-axis threshold (tuned for walking)
-let lastStepTime = 0;
-const minStepInterval = 350; // ms, minimum time between steps
 let motionEventReceived = false;
 
 function addSensorListeners() {
@@ -99,43 +121,31 @@ function handleDeviceMotion(e) {
   motionEventReceived = true;
   if (!e.accelerationIncludingGravity) return;
   let acc = e.accelerationIncludingGravity;
-  let now = e.timeStamp || Date.now();
+  let z = acc.z || 0;
+  let now = Date.now();
 
-  // Use x/y acceleration (in m/s^2)
-  let ax = acc.x || 0;
-  let ay = acc.y || 0;
+  // Band-pass filter: only consider changes within a reasonable range
+  let dz = z - lastZ;
+  lastZ = z;
 
-  // Estimate delta time (in seconds)
-  let dt = 0.05;
-  if (lastMotionTimestamp !== null) {
-    dt = Math.min((now - lastMotionTimestamp) / 1000, 0.2);
+  // Step detection state machine
+  if (stepState === 0) {
+    // Look for upward peak
+    if (dz > stepThreshold && (now - lastStepTime) > minStepInterval) {
+      stepState = 1;
+    }
+  } else if (stepState === 1) {
+    // Look for downward valley
+    if (dz < -stepThreshold && (now - lastStepTime) > minStepInterval && (now - lastStepTime) < maxStepInterval) {
+      user.steps++;
+      moveUser();
+      updateUI();
+      lastStepTime = now;
+      stepState = 0;
+    }
   }
-  lastMotionTimestamp = now;
-
-  // Integrate acceleration to velocity (m/s)
-  velocity.x += ax * dt;
-  velocity.y += ay * dt;
-
-  // Damping
-  velocity.x *= velocityDamping;
-  velocity.y *= velocityDamping;
-
-  // Integrate velocity to position (meters)
-  position.x += velocity.x * dt;
-  position.y += velocity.y * dt;
-
-  // Map to canvas (origin = starting room)
-  user.x = rooms[roomInput.value.trim()]?.x + position.x * metersToPixelsX;
-  user.y = rooms[roomInput.value.trim()]?.y + position.y * metersToPixelsY;
-
-  // Clamp to canvas
-  user.x = Math.max(0, Math.min(canvas.width, user.x));
-  user.y = Math.max(0, Math.min(canvas.height, user.y));
-
-  updateUI();
-  draw();
   // Debug log
-  console.log('motion', {ax, ay, dt, velocity: {...velocity}, position: {...position}, user: {x: user.x, y: user.y}});
+  // console.log('step+heading', {z, dz, stepState, steps: user.steps});
 }
 
 function handleDeviceOrientation(e) {
