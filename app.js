@@ -23,11 +23,24 @@ fetch('rooms.json').then(r => r.json()).then(data => { rooms = data; });
 
 mapImg.onload = () => draw();
 
+// Real-world movement estimation (dead reckoning)
+let velocity = { x: 0, y: 0 };
+let position = { x: 0, y: 0 };
+let lastMotionTimestamp = null;
+const velocityDamping = 0.98; // Damping to reduce drift
+const metersToPixelsX = canvas.width / 10; // 10 meters = full width
+const metersToPixelsY = canvas.height / 10; // 10 meters = full height
+
 function setStartRoom(room) {
   if (rooms[room]) {
+    // Start at room position (in pixels)
     user.x = rooms[room].x;
     user.y = rooms[room].y;
     user.steps = 0;
+    // Reset dead reckoning
+    velocity = { x: 0, y: 0 };
+    position = { x: 0, y: 0 };
+    lastMotionTimestamp = null;
     roomNameSpan.textContent = room;
     draw();
   } else {
@@ -86,22 +99,43 @@ function handleDeviceMotion(e) {
   motionEventReceived = true;
   if (!e.accelerationIncludingGravity) return;
   let acc = e.accelerationIncludingGravity;
-  let z = acc.z || 0;
-  let now = Date.now();
-  // Only count a step if enough time has passed and z-axis spike detected
-  if (
-    lastAcc !== 0 &&
-    Math.abs(z - lastAcc) > stepThreshold &&
-    (now - lastStepTime) > minStepInterval
-  ) {
-    user.steps++;
-    moveUser();
-    updateUI();
-    lastStepTime = now;
+  let now = e.timeStamp || Date.now();
+
+  // Use x/y acceleration (in m/s^2)
+  let ax = acc.x || 0;
+  let ay = acc.y || 0;
+
+  // Estimate delta time (in seconds)
+  let dt = 0.05;
+  if (lastMotionTimestamp !== null) {
+    dt = Math.min((now - lastMotionTimestamp) / 1000, 0.2);
   }
-  lastAcc = z;
+  lastMotionTimestamp = now;
+
+  // Integrate acceleration to velocity (m/s)
+  velocity.x += ax * dt;
+  velocity.y += ay * dt;
+
+  // Damping
+  velocity.x *= velocityDamping;
+  velocity.y *= velocityDamping;
+
+  // Integrate velocity to position (meters)
+  position.x += velocity.x * dt;
+  position.y += velocity.y * dt;
+
+  // Map to canvas (origin = starting room)
+  user.x = rooms[roomInput.value.trim()]?.x + position.x * metersToPixelsX;
+  user.y = rooms[roomInput.value.trim()]?.y + position.y * metersToPixelsY;
+
+  // Clamp to canvas
+  user.x = Math.max(0, Math.min(canvas.width, user.x));
+  user.y = Math.max(0, Math.min(canvas.height, user.y));
+
+  updateUI();
+  draw();
   // Debug log
-  console.log('step-detect', {z, lastAcc, steps: user.steps});
+  console.log('motion', {ax, ay, dt, velocity: {...velocity}, position: {...position}, user: {x: user.x, y: user.y}});
 }
 
 function handleDeviceOrientation(e) {
