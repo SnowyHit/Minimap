@@ -29,36 +29,53 @@ const MAP_TOPLEFT = { lat: 40.000000, lon: 29.000000 };
 const MAP_BOTTOMRIGHT = { lat: 39.999000, lon: 29.001000 };
 let gpsWatchId = null;
 
+// Debug log helper
+function logDebug(msg) {
+  const logDiv = document.getElementById('debugLog');
+  if (logDiv) {
+    const now = new Date().toLocaleTimeString();
+    logDiv.innerText += `[${now}] ${msg}\n`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+}
+
 function latLonToXY(lat, lon) {
   // Linear interpolation between reference points
   const x = ((lon - MAP_TOPLEFT.lon) / (MAP_BOTTOMRIGHT.lon - MAP_TOPLEFT.lon)) * canvas.width;
   const y = ((MAP_TOPLEFT.lat - lat) / (MAP_TOPLEFT.lat - MAP_BOTTOMRIGHT.lat)) * canvas.height;
+  logDebug(`latLonToXY: lat=${lat}, lon=${lon} => x=${x.toFixed(2)}, y=${y.toFixed(2)}`);
   return { x, y };
 }
 
 function startGPS() {
   if (!navigator.geolocation) {
     alert('Cihazınızda GPS desteği yok.');
+    logDebug('GPS not supported.');
     return;
   }
   if (gpsWatchId !== null) {
     navigator.geolocation.clearWatch(gpsWatchId);
+    logDebug('Cleared previous GPS watch.');
   }
   gpsWatchId = navigator.geolocation.watchPosition(
     (pos) => {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
+      logDebug(`GPS update: lat=${lat}, lon=${lon}`);
       const { x, y } = latLonToXY(lat, lon);
       user.x = Math.max(0, Math.min(canvas.width, x));
       user.y = Math.max(0, Math.min(canvas.height, y));
+      logDebug(`Mapped to canvas: x=${user.x.toFixed(2)}, y=${user.y.toFixed(2)}`);
       updateUI();
       draw();
     },
     (err) => {
       alert('Konum alınamadı: ' + err.message);
+      logDebug('GPS error: ' + err.message);
     },
     { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
   );
+  logDebug('Started GPS tracking.');
 }
 
 // Override setStartRoom to start GPS tracking
