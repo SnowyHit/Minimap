@@ -8,17 +8,26 @@
 </head>
 <body>
   <div id="container">
-    <div id="svg-overlay-wrapper">
-      <img id="floorplan" src="floorplan.png" alt="Floor Plan">
-      <svg id="overlay-svg"></svg>
-      <div id="user-arrow"></div>
+    <div id="map-viewport">
+      <div id="svg-overlay-wrapper">
+        <img id="floorplan" src="floorplan.png" alt="Floor Plan">
+        <svg id="overlay-svg"></svg>
+        <div id="user-arrow"></div>
+        <div id="compass-rose"></div>
+      </div>
     </div>
     <div id="instructions-panel">
       <h2>Emergency Escape Demo</h2>
       <div id="current-room">You are in room <span id="room-number">3410</span></div>
       <div id="instructions">Follow the highlighted path to the nearest exit. Your arrow will rotate as you turn your phone.</div>
+      <ul id="instruction-list">
+        <li>Turn left</li>
+        <li>Go through the corridor</li>
+        <li>Try not to breathe smoke</li>
+        <li>Walk down</li>
+      </ul>
     </div>
-    <div id="coords">Position: <span id="coord-x">0.00</span> m, <span id="coord-y">0.00</span> m</div>
+    <div id="coords">Position: <span id="coord-x">0.00</span> m, <span id="coord-y">0.00</span> m | Facing: <span id="facing-rotation">0</span>°</div>
   </div>
   <script src="app.js"></script>
 </body>

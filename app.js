@@ -14,6 +14,7 @@ const ARROW_SIZE = 32; // px
 const arrowEl = document.getElementById('user-arrow');
 const coordXEl = document.getElementById('coord-x');
 const coordYEl = document.getElementById('coord-y');
+const facingRotationEl = document.getElementById('facing-rotation');
 
 function updateArrow() {
   // Keep arrow centered on its tip
@@ -80,12 +81,18 @@ const exits = [
 
 const overlaySvg = document.getElementById('overlay-svg');
 const floorplanImg = document.getElementById('floorplan');
+const mapViewport = document.getElementById('map-viewport');
+const svgOverlayWrapper = document.getElementById('svg-overlay-wrapper');
 
-function setOverlaySize() {
-  overlaySvg.setAttribute('width', floorplanImg.naturalWidth);
-  overlaySvg.setAttribute('height', floorplanImg.naturalHeight);
-  overlaySvg.style.width = floorplanImg.width + 'px';
-  overlaySvg.style.height = floorplanImg.height + 'px';
+// Real-world dimensions
+const IMG_WIDTH_PX = floorplanImg.naturalWidth;
+const IMG_HEIGHT_PX = floorplanImg.naturalHeight;
+
+// Remove setViewportSize and VIEWPORT_METERS logic
+// Center map on arrow only if needed, but do not crop or zoom
+function centerMapOnArrow() {
+  // No pan/zoom, overlays and arrow are positioned absolutely over the full image
+  svgOverlayWrapper.style.transform = '';
 }
 
 function highlightRoom(roomId) {
@@ -149,6 +156,46 @@ function showEmergencyOverlay() {
   drawEscapePath('3410', minIdx);
 }
 
+function drawHighlightedRoad() {
+  // Path from room 3410 to exit-2 (main corridor, right vertical corridor)
+  // Start at center of room 3410
+  const startX = 630; // room-3410 x + width/2
+  const startY = 210; // room-3410 y + height/2
+  // Main corridor: (130, 240) to (930, 240)
+  // Right vertical corridor: (910, 240) to (910, 350)
+  // Exit-2: (870, 170)
+  const points = [
+    [startX, startY],
+    [630, 240], // move up to corridor
+    [930, 240], // right along main corridor
+    [930, 350], // down right vertical corridor
+    [870, 170]  // to exit-2
+  ];
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  path.setAttribute('points', points.map(p => p.join(",")).join(" "));
+  path.setAttribute('class', 'escape-path');
+  path.setAttribute('id', 'highlighted-road');
+  path.style.stroke = '#ffd600';
+  path.style.strokeWidth = '10';
+  path.style.filter = 'drop-shadow(0 0 16px #ffd600cc)';
+  overlaySvg.appendChild(path);
+}
+
+// Patch updateArrow to also center map (no-op for now)
+const origUpdateArrow = updateArrow;
+updateArrow = function() {
+  origUpdateArrow();
+  centerMapOnArrow();
+};
+
+// Remove setupViewportAndCenter and related event listeners
+// Initial center and viewport size
+// floorplanImg.onload = setupViewportAndCenter;
+// window.addEventListener('resize', setupViewportAndCenter);
+// window.addEventListener('load', () => {
+//   setTimeout(setupViewportAndCenter, 100);
+// });
+
 // Device orientation: update arrow rotation based on phone rotation
 if (window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', function(event) {
@@ -165,4 +212,31 @@ if (window.DeviceOrientationEvent) {
 floorplanImg.onload = setOverlaySize;
 window.addEventListener('resize', setOverlaySize);
 setOverlaySize();
-showEmergencyOverlay(); 
+showEmergencyOverlay();
+drawHighlightedRoad();
+
+// Compass rose rendering
+const compassRose = document.getElementById('compass-rose');
+compassRose.innerHTML = `
+  <svg viewBox="0 0 54 54">
+    <circle cx="27" cy="27" r="25" fill="#232837" stroke="#ffd600" stroke-width="2" />
+    <text x="27" y="13" text-anchor="middle" fill="#ffd600" font-size="10" font-family="Segoe UI,Arial" dy="3">N</text>
+    <text x="41" y="29" text-anchor="middle" fill="#b0b8c9" font-size="9" font-family="Segoe UI,Arial" dy="3">E</text>
+    <text x="27" y="47" text-anchor="middle" fill="#b0b8c9" font-size="9" font-family="Segoe UI,Arial" dy="3">S</text>
+    <text x="13" y="29" text-anchor="middle" fill="#b0b8c9" font-size="9" font-family="Segoe UI,Arial" dy="3">W</text>
+    <polygon id="compass-pointer" points="27,27 23,35 27,10 31,35" fill="#ffd600" stroke="#ffd600" stroke-width="1" />
+  </svg>
+`;
+const compassPointer = compassRose.querySelector('#compass-pointer');
+
+// Update compass pointer rotation with device orientation
+if (window.DeviceOrientationEvent) {
+  window.addEventListener('deviceorientation', function(event) {
+    if (typeof event.alpha === 'number') {
+      // North is up, so rotate pointer by -alpha
+      compassPointer.setAttribute('transform', `rotate(${-event.alpha} 27 27)`);
+      // Show current facing rotation (0 = North, 90 = East, etc.)
+      facingRotationEl.textContent = Math.round(event.alpha);
+    }
+  }, true);
+} 
