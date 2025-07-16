@@ -1,82 +1,168 @@
-// DEMO UI LOGIC ONLY - No real navigation or sensors
-let mapImg = new Image();
-mapImg.src = 'mapreal.jpeg';
+// Constants for real-world and SVG dimensions
+const REAL_WIDTH_M = 50;
+const REAL_HEIGHT_M = 30;
+const SVG_WIDTH_PX = 800;
+const SVG_HEIGHT_PX = 480;
 
-let rooms = {};
-let selectedRoom = null;
+// Arrow state
+// Start at center of room 3410 from SVG overlay
+let arrowX = 560 + 60 / 2; // x + width/2 = 590
+let arrowY = 190 + 40 / 2; // y + height/2 = 210
+let arrowAngle = 0; // Degrees, 0 = up
+const ARROW_SIZE = 32; // px
 
-const canvas = document.getElementById('mapCanvas');
-const ctx = canvas.getContext('2d');
-const roomList = document.getElementById('roomList');
-const roomModal = document.getElementById('roomModal');
-const modalRoomName = document.getElementById('modalRoomName');
-const modalRoomInfo = document.getElementById('modalRoomInfo');
-const closeModal = document.getElementById('closeModal');
-const showAllBtn = document.getElementById('showAllBtn');
-const searchBtn = document.getElementById('searchBtn');
+const arrowEl = document.getElementById('user-arrow');
+const coordXEl = document.getElementById('coord-x');
+const coordYEl = document.getElementById('coord-y');
 
-// Load rooms and populate sidebar
-fetch('rooms.json').then(r => r.json()).then(data => {
-  rooms = data;
-  renderRoomList();
+function updateArrow() {
+  // Keep arrow centered on its tip
+  arrowEl.style.left = (arrowX - ARROW_SIZE / 2) + 'px';
+  arrowEl.style.top = (arrowY - ARROW_SIZE / 2) + 'px';
+  arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
+  // Update coordinates
+  const realX = (arrowX / SVG_WIDTH_PX) * REAL_WIDTH_M;
+  const realY = (arrowY / SVG_HEIGHT_PX) * REAL_HEIGHT_M;
+  coordXEl.textContent = realX.toFixed(2);
+  coordYEl.textContent = realY.toFixed(2);
+}
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
+function moveArrow(dx, dy, dAngle = 0) {
+  arrowX = clamp(arrowX + dx, ARROW_SIZE / 2, SVG_WIDTH_PX - ARROW_SIZE / 2);
+  arrowY = clamp(arrowY + dy, ARROW_SIZE / 2, SVG_HEIGHT_PX - ARROW_SIZE / 2);
+  arrowAngle = (arrowAngle + dAngle) % 360;
+  updateArrow();
+}
+
+document.addEventListener('keydown', (e) => {
+  const stepPx = 8; // Move step in px
+  switch (e.key) {
+    case 'ArrowUp':
+      moveArrow(0, -stepPx);
+      break;
+    case 'ArrowDown':
+      moveArrow(0, stepPx);
+      break;
+    case 'ArrowLeft':
+      moveArrow(-stepPx, 0);
+      break;
+    case 'ArrowRight':
+      moveArrow(stepPx, 0);
+      break;
+    case 'a': // rotate left
+      moveArrow(0, 0, -15);
+      break;
+    case 'd': // rotate right
+      moveArrow(0, 0, 15);
+      break;
+  }
 });
 
-function renderRoomList() {
-  roomList.innerHTML = '';
-  Object.keys(rooms).forEach(roomId => {
-    const li = document.createElement('li');
-    li.textContent = roomId;
-    li.onclick = () => selectRoom(roomId);
-    if (selectedRoom === roomId) li.classList.add('selected');
-    roomList.appendChild(li);
+// Initial render
+updateArrow();
+
+// --- Emergency Escape Overlay Logic ---
+
+// Room and exit data from SVG overlay
+const rooms = {
+  '3410': { x: 560, y: 190, width: 60, height: 40 },
+  // Add more rooms if needed
+};
+const exits = [
+  { cx: 50, cy: 170 },
+  { cx: 870, cy: 170 },
+  { cx: 870, cy: 420 },
+];
+
+const overlaySvg = document.getElementById('overlay-svg');
+const floorplanImg = document.getElementById('floorplan');
+
+function setOverlaySize() {
+  overlaySvg.setAttribute('width', floorplanImg.naturalWidth);
+  overlaySvg.setAttribute('height', floorplanImg.naturalHeight);
+  overlaySvg.style.width = floorplanImg.width + 'px';
+  overlaySvg.style.height = floorplanImg.height + 'px';
+}
+
+function highlightRoom(roomId) {
+  const room = rooms[roomId];
+  if (!room) return;
+  // Draw highlighted rectangle
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', room.x);
+  rect.setAttribute('y', room.y);
+  rect.setAttribute('width', room.width);
+  rect.setAttribute('height', room.height);
+  rect.setAttribute('class', 'highlight-room');
+  overlaySvg.appendChild(rect);
+}
+
+function highlightExits() {
+  exits.forEach(exit => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', exit.cx);
+    circle.setAttribute('cy', exit.cy);
+    circle.setAttribute('r', 16);
+    circle.setAttribute('class', 'exit-circle');
+    overlaySvg.appendChild(circle);
   });
 }
 
-function selectRoom(roomId) {
-  selectedRoom = roomId;
-  renderRoomList();
-  draw();
-  showRoomModal(roomId);
+function drawEscapePath(fromRoomId, toExitIdx) {
+  const room = rooms[fromRoomId];
+  const exit = exits[toExitIdx];
+  if (!room || !exit) return;
+  // Start from room center
+  const startX = room.x + room.width / 2;
+  const startY = room.y + room.height / 2;
+  const endX = exit.cx;
+  const endY = exit.cy;
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  path.setAttribute('points', `${startX},${startY} ${endX},${endY}`);
+  path.setAttribute('class', 'escape-path');
+  path.setAttribute('id', 'escape-path');
+  overlaySvg.appendChild(path);
 }
 
-function showRoomModal(roomId) {
-  modalRoomName.textContent = `Oda: ${roomId}`;
-  modalRoomInfo.textContent = `Bu, demo amaçlı bir oda bilgisidir. Koordinatlar: (${rooms[roomId].x}, ${rooms[roomId].y})`;
-  roomModal.classList.remove('hidden');
+function clearOverlay() {
+  while (overlaySvg.firstChild) overlaySvg.removeChild(overlaySvg.firstChild);
 }
 
-closeModal.onclick = () => {
-  roomModal.classList.add('hidden');
-};
-
-// Demo button actions
-showAllBtn.onclick = () => {
-  selectedRoom = null;
-  renderRoomList();
-  draw();
-};
-searchBtn.onclick = () => {
-  alert('Demo: Oda arama özelliği sunulacaktır.');
-};
-
-mapImg.onload = () => draw();
-
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(mapImg, 0, 0, canvas.width, canvas.height);
-  // Draw all rooms
-  Object.keys(rooms).forEach(roomId => {
-    const { x, y } = rooms[roomId];
-    ctx.beginPath();
-    ctx.arc(x, y, 16, 0, 2 * Math.PI);
-    ctx.fillStyle = (selectedRoom === roomId) ? '#ff9800' : '#1976d2';
-    ctx.globalAlpha = (selectedRoom === roomId) ? 0.9 : 0.6;
-    ctx.fill();
-    ctx.globalAlpha = 1.0;
-    ctx.font = 'bold 1em Segoe UI, Arial';
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(roomId, x, y);
+function showEmergencyOverlay() {
+  clearOverlay();
+  highlightRoom('3410');
+  highlightExits();
+  // Find nearest exit (Euclidean distance)
+  const room = rooms['3410'];
+  const roomCenter = { x: room.x + room.width / 2, y: room.y + room.height / 2 };
+  let minDist = Infinity, minIdx = 0;
+  exits.forEach((exit, i) => {
+    const dx = exit.cx - roomCenter.x;
+    const dy = exit.cy - roomCenter.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < minDist) { minDist = dist; minIdx = i; }
   });
-} 
+  drawEscapePath('3410', minIdx);
+}
+
+// Device orientation: update arrow rotation based on phone rotation
+if (window.DeviceOrientationEvent) {
+  window.addEventListener('deviceorientation', function(event) {
+    // event.alpha: compass heading (0 = north)
+    // We want 0deg = up, so rotate arrow by -alpha
+    if (typeof event.alpha === 'number') {
+      arrowAngle = -event.alpha;
+      updateArrow();
+    }
+  }, true);
+}
+
+// Ensure overlay matches image size
+floorplanImg.onload = setOverlaySize;
+window.addEventListener('resize', setOverlaySize);
+setOverlaySize();
+showEmergencyOverlay(); 

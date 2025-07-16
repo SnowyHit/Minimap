@@ -1,36 +1,24 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Otel Yönlendirme Demo</title>
-  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=800, initial-scale=1.0">
+  <title>Fire Escape Simulation</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <header>
-      <img src="icon-192.png" alt="Logo" class="logo">
-      <h1>Otel Yönlendirme Demo</h1>
-    </header>
-    <div class="main-content">
-      <aside id="sidebar">
-        <h2>Odalar</h2>
-        <ul id="roomList"></ul>
-        <button class="demo-btn" id="showAllBtn">Tüm Odaları Göster</button>
-        <button class="demo-btn" id="searchBtn">Oda Ara</button>
-      </aside>
-      <section id="mapSection">
-        <canvas id="mapCanvas" width="800" height="600" aria-label="Harita"></canvas>
-      </section>
+  <div id="container">
+    <div id="svg-overlay-wrapper">
+      <img id="floorplan" src="floorplan.png" alt="Floor Plan">
+      <svg id="overlay-svg"></svg>
+      <div id="user-arrow"></div>
     </div>
-  </div>
-  <div id="roomModal" class="modal hidden">
-    <div class="modal-content">
-      <span class="close" id="closeModal">&times;</span>
-      <h2 id="modalRoomName">Oda Bilgisi</h2>
-      <p id="modalRoomInfo">Bu, demo amaçlı bir oda bilgisidir.</p>
+    <div id="instructions-panel">
+      <h2>Emergency Escape Demo</h2>
+      <div id="current-room">You are in room <span id="room-number">3410</span></div>
+      <div id="instructions">Follow the highlighted path to the nearest exit. Your arrow will rotate as you turn your phone.</div>
     </div>
+    <div id="coords">Position: <span id="coord-x">0.00</span> m, <span id="coord-y">0.00</span> m</div>
   </div>
   <script src="app.js"></script>
 </body>
