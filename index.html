@@ -1,33 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=800, initial-scale=1.0">
-  <title>Fire Escape Simulation</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚨 Acil Durum Yönlendirme Sistemi</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles/style.css">
+  <!-- GSAP Animation Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
-  <div id="container">
-    <div id="map-viewport">
-      <div id="svg-overlay-wrapper">
-        <img id="floorplan" src="floorplan.png" alt="Floor Plan">
-        <svg id="overlay-svg"></svg>
-        <div id="user-arrow"></div>
+  <div id="app">
+    <h1>🚨 Acil Durum Çıkış Planı</h1>
+    <div class="map-container">
+      <img id="mapImage" src="floor-plan.png" alt="Kat Planı" style="width: 800px; height: 600px; position: absolute; z-index: 1;">
+      <canvas id="mapCanvas" width="800" height="600" aria-label="Harita" style="position: absolute; z-index: 2; background: transparent;"></canvas>
+    </div>
+    
+    <!-- Simplified Info Card -->
+    <section id="infoCard" aria-label="Konum Bilgileri">
+      <div id="info">
+        <div class="info-block"><span class="info-label">📍 Mevcut Konum</span><span id="roomName">-</span></div>
+        <div class="info-block"><span class="info-label">🎯 Hedef Çıkış</span><span id="targetExit">-</span></div>
+        <div class="info-block"><span class="info-label">📏 Mesafe</span><span id="totalDistance">-</span></div>
+      </div>
+    </section>
+
+    <!-- Route Information Panel -->
+    <section id="routePanel" class="route-panel" style="display: none;">
+      <div class="route-header">
+        <h3>🎯 Kaçış Rotası</h3>
+        <div id="routeStats">
+          <span id="routeDistance">-</span> metre • 
+          <span id="estimatedTime">-</span> saniye
+        </div>
+      </div>
+      <div id="routeSteps" class="route-steps"></div>
+      <div class="route-progress">
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div id="progressText">En hızlı kaçış rotası hesaplandı</div>
+      </div>
+    </section>
+
+    <!-- Directions Panel -->
+    <section id="directionsPanel" class="directions-panel" style="display: none;">
+      <div class="current-instruction">
+        <div id="currentStep" class="step-instruction">
+          <div class="step-icon">🎯</div>
+          <div class="step-text">Rotanız hazırlanıyor...</div>
+        </div>
+      </div>
+      <div class="next-steps">
+        <h4>📋 Sıradaki Adımlar:</h4>
+        <div id="upcomingSteps"></div>
+      </div>
+    </section>
+
+    <!-- Emergency Alert -->
+    <div id="emergencyAlert" class="emergency-alert" style="display: none;">
+      <div class="alert-content">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-text">ACİL DURUM! En yakın çıkışa yönlendiriliyorsunuz</div>
       </div>
     </div>
-    <div id="instructions-panel">
-      <h2>Emergency Escape Demo</h2>
-      <div id="current-room">You are in room <span id="room-number">3410</span></div>
-      <div id="instructions">Follow the highlighted path to the nearest exit. Your arrow will rotate as you turn your phone.</div>
-      <ul id="instruction-list">
-        <li>Turn left</li>
-        <li>Go through the corridor</li>
-        <li>Try not to breathe smoke</li>
-        <li>Walk down</li>
-      </ul>
-    </div>
-    <div id="coords">Position: <span id="coord-x">0.00</span> m, <span id="coord-y">0.00</span> m | Facing: <span id="facing-rotation">0</span>°</div>
+    
+    <section id="controlSection">
+      <h3>🏨 Oda Seçimi</h3>
+      <div class="room-selection">
+        <label for="roomInput">Bulunduğunuz oda numarası:</label>
+        <input type="text" id="roomInput" placeholder="ör. 3401" aria-label="Oda Numarası">
+        <button id="startBtn">🎯 Kaçış Rotası Hesapla</button>
+      </div>
+      <div class="emergency-section">
+        <button id="emergencyBtn" class="emergency-btn">🚨 ACİL DURUM MODU</button>
+        <p class="demo-note">⚡ Demo: WASD tuşları ile hareket edebilirsiniz</p>
+      </div>
+    </section>
   </div>
-  <script src="app.js"></script>
+  <script src="src/app.js"></script>
 </body>
 </html> 
