@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Otel Yönlendirme Sistemi</title>
+  <title>🚨 Acil Durum Yönlendirme Sistemi</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles/style.css">
   <!-- GSAP Animation Library -->
@@ -11,16 +11,15 @@
 </head>
 <body>
   <div id="app">
-    <h1>🚨 Acil Durum Yönlendirme Sistemi</h1>
+    <h1>🚨 Acil Durum Çıkış Planı</h1>
     <canvas id="mapCanvas" width="800" height="600" aria-label="Harita"></canvas>
     
-    <!-- Enhanced Info Card -->
-    <section id="infoCard" aria-label="Kullanıcı Bilgileri">
+    <!-- Simplified Info Card -->
+    <section id="infoCard" aria-label="Konum Bilgileri">
       <div id="info">
-        <div class="info-block"><span class="info-label">📍 Konum</span><span id="roomName">-</span></div>
-        <div class="info-block"><span class="info-label">👣 Adım</span><span id="stepCount">0</span></div>
-        <div class="info-block"><span class="info-label">🧭 Yön</span><span id="direction">-</span></div>
-        <div class="info-block"><span class="info-label">🚶 Durum</span><span id="walkingStatus">Bekliyor</span></div>
+        <div class="info-block"><span class="info-label">📍 Mevcut Konum</span><span id="roomName">-</span></div>
+        <div class="info-block"><span class="info-label">🎯 Hedef Çıkış</span><span id="targetExit">-</span></div>
+        <div class="info-block"><span class="info-label">📏 Mesafe</span><span id="totalDistance">-</span></div>
       </div>
     </section>
 
@@ -29,7 +28,7 @@
       <div class="route-header">
         <h3>🎯 Kaçış Rotası</h3>
         <div id="routeStats">
-          <span id="totalDistance">-</span> metre • 
+          <span id="routeDistance">-</span> metre • 
           <span id="estimatedTime">-</span> saniye
         </div>
       </div>
@@ -38,7 +37,7 @@
         <div class="progress-bar">
           <div id="progressFill" class="progress-fill"></div>
         </div>
-        <div id="progressText">Rotayı takip edin</div>
+        <div id="progressText">En hızlı kaçış rotası hesaplandı</div>
       </div>
     </section>
 
@@ -47,7 +46,7 @@
       <div class="current-instruction">
         <div id="currentStep" class="step-instruction">
           <div class="step-icon">🎯</div>
-          <div class="step-text">Rotanız hesaplanıyor...</div>
+          <div class="step-text">Rotanız hazırlanıyor...</div>
         </div>
       </div>
       <div class="next-steps">
@@ -64,11 +63,17 @@
       </div>
     </div>
     
-    <section id="qrInputSection">
-      <label for="roomInput">Başlangıç Odası (QR simülasyonu):</label>
-      <input type="text" id="roomInput" placeholder="ör. 3401" aria-label="Başlangıç Odası">
-      <button id="startBtn">🚀 Başla</button>
-      <button id="emergencyBtn" class="emergency-btn">🚨 ACİL DURUM</button>
+    <section id="controlSection">
+      <h3>🏨 Oda Seçimi</h3>
+      <div class="room-selection">
+        <label for="roomInput">Bulunduğunuz oda numarası:</label>
+        <input type="text" id="roomInput" placeholder="ör. 3401" aria-label="Oda Numarası">
+        <button id="startBtn">🎯 Kaçış Rotası Hesapla</button>
+      </div>
+      <div class="emergency-section">
+        <button id="emergencyBtn" class="emergency-btn">🚨 ACİL DURUM MODU</button>
+        <p class="demo-note">⚡ Demo: WASD tuşları ile hareket edebilirsiniz</p>
+      </div>
     </section>
   </div>
   <script src="src/app.js"></script>

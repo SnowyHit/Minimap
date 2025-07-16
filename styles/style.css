@@ -310,20 +310,50 @@ h1 {
   font-size: 1.1em;
 }
 
-/* Buttons */
-#qrInputSection {
+/* Control Section */
+#controlSection {
   text-align: center;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 10px;
+  padding: 25px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 15px;
   margin-top: 20px;
+  border: 2px solid #dee2e6;
 }
 
-#qrInputSection label {
+#controlSection h3 {
+  margin: 0 0 20px 0;
+  color: #495057;
+  font-size: 1.3em;
+}
+
+.room-selection {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.room-selection label {
   display: block;
   margin-bottom: 10px;
   font-weight: bold;
   color: #555;
+  font-size: 1.1em;
+}
+
+.emergency-section {
+  padding: 15px;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 10px;
+  border: 2px dashed #f44336;
+}
+
+.demo-note {
+  margin: 10px 0 0 0;
+  font-size: 0.9em;
+  color: #666;
+  font-style: italic;
 }
 
 #roomInput {

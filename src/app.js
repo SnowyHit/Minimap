@@ -13,18 +13,8 @@ const user = {
   x: 400,
   y: 300,
   direction: 0,
-  stepLength: 0.7,
-  steps: 0,
   currentRoom: null,
   targetExit: null
-};
-
-const sensor = {
-  stepState: 'stationary',
-  consecutiveSteps: 0,
-  lastStepTime: 0,
-  accelerationBuffer: [],
-  walkingStateElement: null
 };
 
 // Animation settings
@@ -94,7 +84,6 @@ async function init() {
   
   canvas = document.getElementById('mapCanvas');
   ctx = canvas.getContext('2d');
-  sensor.walkingStateElement = document.getElementById('walkingStatus');
   
   try {
     await loadRoomData();
@@ -130,28 +119,8 @@ function setupEventListeners() {
   document.getElementById('startBtn').addEventListener('click', startNavigation);
   document.getElementById('emergencyBtn').addEventListener('click', activateEmergencyMode);
   
-  // Enhanced sensor permissions
-  if (DeviceMotionEvent?.requestPermission) {
-    DeviceMotionEvent.requestPermission().then(response => {
-      if (response === 'granted') {
-        window.addEventListener('devicemotion', handleMotion);
-        console.log('✅ Motion sensors authorized');
-      }
-    });
-  } else {
-    window.addEventListener('devicemotion', handleMotion);
-  }
-  
-  if (DeviceOrientationEvent?.requestPermission) {
-    DeviceOrientationEvent.requestPermission().then(response => {
-      if (response === 'granted') {
-        window.addEventListener('deviceorientation', handleOrientation);
-        console.log('✅ Orientation sensors authorized');
-      }
-    });
-  } else {
-    window.addEventListener('deviceorientation', handleOrientation);
-  }
+  // Demo mode - sensors disabled for presentation
+  console.log('📱 Demo mode: Motion sensors disabled');
   
   // Keyboard controls for testing
   window.addEventListener('keydown', handleKeyboard);
@@ -176,6 +145,11 @@ function startNavigation() {
     return;
   }
   
+  // Reset route info
+  user.targetExit = null;
+  currentPath = [];
+  currentRouteInstructions = [];
+  
   user.currentRoom = roomId;
   const startRoom = rooms[roomId];
   const canvasPos = realToCanvas(startRoom.x, startRoom.y);
@@ -183,18 +157,18 @@ function startNavigation() {
   user.x = canvasPos.x;
   user.y = canvasPos.y;
   
-     // Animate user to position
-   gsap.to(user, {
-     duration: 0.5, // Faster user positioning
-     ease: "back.out(1.7)",
-     onUpdate: () => {
-       updateUI();
-       draw();
-     },
-     onComplete: () => {
-       calculateAndShowRoute();
-     }
-   });
+  // Animate user to position
+  gsap.to(user, {
+    duration: 0.5, // Faster user positioning
+    ease: "back.out(1.7)",
+    onUpdate: () => {
+      updateUI();
+      draw();
+    },
+    onComplete: () => {
+      calculateAndShowRoute();
+    }
+  });
   
   updateUI();
   console.log(`📍 Navigation started from room ${roomId}`);
@@ -243,11 +217,14 @@ function calculateAndShowRoute(isEmergency = false) {
   currentPath = findEscapeRoute(user.currentRoom, isEmergency);
   currentRouteInstructions = generateDetailedInstructions(currentPath);
   
+  // Update UI with route info
+  updateUI();
+  
   showRoutePanel();
   showDirectionsPanel();
   animatePathDrawing();
   
-  console.log(`🗺️ Route calculated: ${currentPath.length} waypoints`);
+  console.log(`🗺️ Route calculated: ${currentPath.length} waypoints to ${user.targetExit}`);
 }
 
 // Enhanced Dijkstra pathfinding
@@ -415,7 +392,7 @@ function showRoutePanel() {
   const totalDistance = currentRouteInstructions.reduce((sum, inst) => sum + inst.distance, 0);
   const estimatedTime = Math.ceil(totalDistance / 1.2); // 1.2 m/s walking speed
   
-  document.getElementById('totalDistance').textContent = totalDistance;
+  document.getElementById('routeDistance').textContent = totalDistance;
   document.getElementById('estimatedTime').textContent = estimatedTime;
   
   // Add steps with staggered animation
@@ -853,82 +830,15 @@ function drawUser() {
   ctx.restore();
 }
 
-// Enhanced motion detection
-function handleMotion(event) {
-  const acc = event.accelerationIncludingGravity;
-  if (!acc) return;
+// Simple movement for demo
+function moveUser(deltaX, deltaY) {
+  const newX = Math.max(0, Math.min(canvas.width, user.x + deltaX));
+  const newY = Math.max(0, Math.min(canvas.height, user.y + deltaY));
   
-  const magnitude = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
-  sensor.accelerationBuffer.push({ x: acc.x, y: acc.y, z: acc.z, magnitude, time: Date.now() });
-  
-  // Keep buffer size manageable
-  if (sensor.accelerationBuffer.length > 20) {
-    sensor.accelerationBuffer.shift();
-  }
-  
-  detectStep(magnitude);
-}
-
-// Enhanced step detection
-function detectStep(magnitude) {
-  const now = Date.now();
-  const HIGH_THRESHOLD = 1.2;
-  const LOW_THRESHOLD = 0.35;
-  const MIN_STEP_INTERVAL = 300;
-  
-  // Simple but effective step detection
-  if (magnitude > HIGH_THRESHOLD && 
-      (now - sensor.lastStepTime) > MIN_STEP_INTERVAL) {
-    
-    sensor.consecutiveSteps++;
-    sensor.lastStepTime = now;
-    
-    // Update walking state
-    if (sensor.consecutiveSteps >= 2) {
-      sensor.stepState = 'walking';
-    } else if (sensor.consecutiveSteps === 1) {
-      sensor.stepState = 'maybe-walking';
-    }
-    
-    stepForward();
-    updateWalkingStatus();
-  }
-  
-  // Reset walking state if no steps for 2.5s
-  if (now - sensor.lastStepTime > 2500) {
-    sensor.consecutiveSteps = 0;
-    sensor.stepState = 'stationary';
-    updateWalkingStatus();
-  }
-}
-
-// Update walking status with visual feedback
-function updateWalkingStatus() {
-  const statusElement = sensor.walkingStateElement;
-  const statusTexts = {
-    'walking': '🚶 Yürüyor',
-    'maybe-walking': '❓ Belki yürüyor',
-    'stationary': '⏸️ Duruyor'
-  };
-  
-  statusElement.textContent = statusTexts[sensor.stepState] || 'Bilinmiyor';
-  statusElement.className = sensor.stepState;
-}
-
-// Enhanced step forward with animation
-function stepForward() {
-  const rad = ((user.direction || 0) - 90) * (Math.PI / 180);
-  const realPos = canvasToReal(user.x, user.y);
-  
-  const newRealX = realPos.x + Math.cos(rad) * user.stepLength;
-  const newRealY = realPos.y + Math.sin(rad) * user.stepLength;
-  const newCanvasPos = realToCanvas(newRealX, newRealY);
-  
-  // Animate user movement
   gsap.to(user, {
-    x: Math.max(0, Math.min(canvas.width, newCanvasPos.x)),
-    y: Math.max(0, Math.min(canvas.height, newCanvasPos.y)),
-    duration: 0.3,
+    x: newX,
+    y: newY,
+    duration: 0.2,
     ease: "power2.out",
     onUpdate: () => {
       updateUI();
@@ -938,9 +848,6 @@ function stepForward() {
       updateRouteProgress();
     }
   });
-  
-  user.steps++;
-  console.log(`👣 Step ${user.steps}: moved to (${newRealX.toFixed(1)}, ${newRealY.toFixed(1)})`);
 }
 
 // Update route progress and instructions
@@ -990,27 +897,18 @@ function updateCurrentInstruction(instructionIndex) {
   );
 }
 
-// Handle device orientation
-function handleOrientation(event) {
-  if (typeof event.alpha === 'number') {
-    user.direction = (event.alpha + 0) % 360;
-    updateUI();
-    draw();
-  }
-}
 
-// Keyboard controls for testing
+
+// Keyboard controls for demo
 function handleKeyboard(event) {
   const step = 20;
   switch(event.key) {
-    case 'w': case 'W': user.y -= step; break;
-    case 's': case 'S': user.y += step; break;
-    case 'a': case 'A': user.x -= step; break;
-    case 'd': case 'D': user.x += step; break;
+    case 'w': case 'W': moveUser(0, -step); break;
+    case 's': case 'S': moveUser(0, step); break;
+    case 'a': case 'A': moveUser(-step, 0); break;
+    case 'd': case 'D': moveUser(step, 0); break;
     case 'e': case 'E': activateEmergencyMode(); break;
   }
-  updateUI();
-  draw();
 }
 
 // Utility functions
@@ -1050,9 +948,19 @@ function updateUI() {
   const nearestRoom = findNearestNode(userRealPos.x, userRealPos.y);
   
   document.getElementById('roomName').textContent = nearestRoom || 'Bilinmiyor';
-  document.getElementById('stepCount').textContent = user.steps;
-  document.getElementById('direction').textContent = user.direction ? 
-    `${Math.round(user.direction)}°` : '-';
+  
+  // Update target exit
+  if (user.targetExit) {
+    document.getElementById('targetExit').textContent = user.targetExit;
+  }
+  
+  // Calculate and show total distance
+  if (currentRouteInstructions.length > 0) {
+    const totalDist = currentRouteInstructions.reduce((sum, inst) => sum + inst.distance, 0);
+    document.getElementById('totalDistance').textContent = `${totalDist}m`;
+  } else {
+    document.getElementById('totalDistance').textContent = '-';
+  }
 }
 
 function showError(message) {
