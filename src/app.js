@@ -8,6 +8,7 @@ let isEmergencyMode = false;
 let routeAnimationTween = null;
 let dashOffset = 0;
 let arrowPosition = { x: 0, y: 0, angle: 0 };
+let mapDisplayHeight = 600; // will be updated after image loads
 
 const user = {
   x: 400,
@@ -84,6 +85,25 @@ async function init() {
   
   canvas = document.getElementById('mapCanvas');
   ctx = canvas.getContext('2d');
+  
+  // Adjust canvas height once background image is loaded to keep coordinates aligned
+  const mapImg = document.getElementById('mapImage');
+  if (mapImg && !mapImg.complete) {
+    mapImg.addEventListener('load', resizeCanvasToImage);
+  } else if (mapImg) {
+    // Image already cached
+    resizeCanvasToImage();
+  }
+  
+  async function resizeCanvasToImage() {
+    const scale = canvas.width / mapImg.naturalWidth;
+    canvas.height = Math.round(mapImg.naturalHeight * scale);
+    mapDisplayHeight = canvas.height;
+    // Ensure container respects new height
+    canvas.style.height = `${canvas.height}px`;
+    // Redraw with new scale
+    draw();
+  }
   
   try {
     await loadRoomData();
@@ -556,27 +576,13 @@ function draw() {
   drawUser();
 }
 
-// Draw the map (simplified - you can load SVG here)
+// Draw the map (hidden - only background image visible, SVG used for pathfinding)
 function drawMap() {
-  // Background
-  ctx.fillStyle = '#f8f9fa';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Clear canvas with transparent background
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // This would load your SVG map
-  // For now, just draw a simple representation
-  Object.keys(rooms).forEach(nodeId => {
-    const node = rooms[nodeId];
-    const canvasPos = realToCanvas(node.x, node.y);
-    
-    ctx.fillStyle = node.type === 'room' ? '#e3f2fd' : 
-                    node.type === 'exit' ? '#c8e6c9' : '#fff3e0';
-    ctx.fillRect(canvasPos.x - 15, canvasPos.y - 10, 30, 20);
-    
-    ctx.fillStyle = '#333';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(nodeId, canvasPos.x, canvasPos.y + 4);
-  });
+  // SVG coordinate system and rooms data still used for pathfinding
+  // but no visual elements drawn here - PNG image shows in background
 }
 
 // Draw animated route path with dashed lines and moving arrow
@@ -915,14 +921,14 @@ function handleKeyboard(event) {
 function realToCanvas(realX, realY) {
   return {
     x: (realX / 100) * canvas.width,
-    y: (realY / 50) * canvas.height
+    y: (realY / 75) * mapDisplayHeight
   };
 }
 
 function canvasToReal(canvasX, canvasY) {
   return {
     x: (canvasX / canvas.width) * 100,
-    y: (canvasY / canvas.height) * 50
+    y: (canvasY / mapDisplayHeight) * 75
   };
 }
 

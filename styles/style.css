@@ -31,13 +31,25 @@ h1 {
   to { color: #ff5722; }
 }
 
-#mapCanvas {
+.map-container {
+  position: relative;
+  width: 800px;
+  height: 600px;
+  margin: 0 auto 20px;
   border: 2px solid #ddd;
   border-radius: 10px;
-  display: block;
-  margin: 0 auto 20px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: #f8f9fa;
+  overflow: hidden;
+}
+
+#mapCanvas {
+  display: block;
+  background: transparent;
+}
+
+#mapImage {
+  display: block;
+  object-fit: cover;
 }
 
 /* Enhanced Info Card */

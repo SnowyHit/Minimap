@@ -12,7 +12,10 @@
 <body>
   <div id="app">
     <h1>🚨 Acil Durum Çıkış Planı</h1>
-    <canvas id="mapCanvas" width="800" height="600" aria-label="Harita"></canvas>
+    <div class="map-container">
+      <img id="mapImage" src="floor-plan.png" alt="Kat Planı" style="width: 800px; height: 600px; position: absolute; z-index: 1;">
+      <canvas id="mapCanvas" width="800" height="600" aria-label="Harita" style="position: absolute; z-index: 2; background: transparent;"></canvas>
+    </div>
     
     <!-- Simplified Info Card -->
     <section id="infoCard" aria-label="Konum Bilgileri">
