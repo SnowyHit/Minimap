@@ -6,10 +6,10 @@ const SVG_HEIGHT_PX = 480;
 
 // Arrow state
 // Start at center of room 3410 from SVG overlay
-let arrowX = 560 + 60 / 2; // x + width/2 = 590
-let arrowY = 190 + 40 / 2; // y + height/2 = 210
-let arrowAngle = 0; // Degrees, 0 = up
-const ARROW_SIZE = 32; // px
+arrowX = 630; // room-3410 x + width/2
+arrowY = 210; // room-3410 y + height/2
+arrowAngle = 0;
+updateArrow();
 
 const arrowEl = document.getElementById('user-arrow');
 const coordXEl = document.getElementById('coord-x');
@@ -209,6 +209,11 @@ updateArrow = function() {
 //   setTimeout(setupViewportAndCenter, 100);
 // });
 
+function getDirectionLabel(deg) {
+  const dirs = ["North", "North-East", "East", "South-East", "South", "South-West", "West", "North-West", "North"];
+  return dirs[Math.round(((deg % 360) / 45))];
+}
+
 // Device orientation: update arrow rotation based on phone rotation
 if (window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', function(event) {
@@ -217,6 +222,8 @@ if (window.DeviceOrientationEvent) {
     if (typeof event.alpha === 'number') {
       arrowAngle = -event.alpha;
       updateArrow();
+      const deg = Math.round(event.alpha);
+      facingRotationEl.textContent = `${deg}° ${getDirectionLabel(deg)}`;
     }
   }, true);
 }
