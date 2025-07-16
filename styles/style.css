@@ -2,7 +2,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #e38d11;
   min-height: 100vh;
   color: #333;
 }
@@ -24,6 +24,13 @@ h1 {
   font-weight: bold;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
   animation: pulse 2s infinite alternate;
+}
+
+.hotel-logo {
+  height: 60px;
+  width: auto;
+  margin-right: 10px;
+  vertical-align: middle;
 }
 
 @keyframes pulse {
@@ -97,7 +104,7 @@ h1 {
 
 /* Route Panel */
 .route-panel {
-  background: linear-gradient(45deg, #4CAF50, #45a049);
+  background: #399434;
   color: white;
   padding: 20px;
   border-radius: 12px;
@@ -564,4 +571,24 @@ body[data-theme="dark"] .emergency-btn {
 /* Hide directions panel - redundant info */
 .directions-panel {
   display: none !important;
+} 
+
+/* Header with centered title and left logo */
+.header-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.header-wrapper .hotel-logo {
+  position: absolute;
+  left: 0;
+  height: 60px;
+  width: auto;
+}
+
+.header-wrapper h1 {
+  margin: 0;
 } 
