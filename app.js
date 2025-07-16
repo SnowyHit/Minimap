@@ -16,10 +16,19 @@ const coordXEl = document.getElementById('coord-x');
 const coordYEl = document.getElementById('coord-y');
 const facingRotationEl = document.getElementById('facing-rotation');
 
+function getImageScales() {
+  const displayedWidth = floorplanImg.clientWidth;
+  const displayedHeight = floorplanImg.clientHeight;
+  const scaleX = displayedWidth / floorplanImg.naturalWidth;
+  const scaleY = displayedHeight / floorplanImg.naturalHeight;
+  return { scaleX, scaleY };
+}
+
 function updateArrow() {
+  const { scaleX, scaleY } = getImageScales();
   // Keep arrow centered on its tip
-  arrowEl.style.left = (arrowX - ARROW_SIZE / 2) + 'px';
-  arrowEl.style.top = (arrowY - ARROW_SIZE / 2) + 'px';
+  arrowEl.style.left = (arrowX * scaleX - ARROW_SIZE / 2) + 'px';
+  arrowEl.style.top = (arrowY * scaleY - ARROW_SIZE / 2) + 'px';
   arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
   // Update coordinates
   const realX = (arrowX / SVG_WIDTH_PX) * REAL_WIDTH_M;
@@ -98,22 +107,24 @@ function centerMapOnArrow() {
 function highlightRoom(roomId) {
   const room = rooms[roomId];
   if (!room) return;
+  const { scaleX, scaleY } = getImageScales();
   // Draw highlighted rectangle
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  rect.setAttribute('x', room.x);
-  rect.setAttribute('y', room.y);
-  rect.setAttribute('width', room.width);
-  rect.setAttribute('height', room.height);
+  rect.setAttribute('x', room.x * scaleX);
+  rect.setAttribute('y', room.y * scaleY);
+  rect.setAttribute('width', room.width * scaleX);
+  rect.setAttribute('height', room.height * scaleY);
   rect.setAttribute('class', 'highlight-room');
   overlaySvg.appendChild(rect);
 }
 
 function highlightExits() {
+  const { scaleX, scaleY } = getImageScales();
   exits.forEach(exit => {
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', exit.cx);
-    circle.setAttribute('cy', exit.cy);
-    circle.setAttribute('r', 16);
+    circle.setAttribute('cx', exit.cx * scaleX);
+    circle.setAttribute('cy', exit.cy * scaleY);
+    circle.setAttribute('r', 16 * ((scaleX + scaleY) / 2));
     circle.setAttribute('class', 'exit-circle');
     overlaySvg.appendChild(circle);
   });
@@ -123,11 +134,12 @@ function drawEscapePath(fromRoomId, toExitIdx) {
   const room = rooms[fromRoomId];
   const exit = exits[toExitIdx];
   if (!room || !exit) return;
+  const { scaleX, scaleY } = getImageScales();
   // Start from room center
-  const startX = room.x + room.width / 2;
-  const startY = room.y + room.height / 2;
-  const endX = exit.cx;
-  const endY = exit.cy;
+  const startX = (room.x + room.width / 2) * scaleX;
+  const startY = (room.y + room.height / 2) * scaleY;
+  const endX = exit.cx * scaleX;
+  const endY = exit.cy * scaleY;
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   path.setAttribute('points', `${startX},${startY} ${endX},${endY}`);
   path.setAttribute('class', 'escape-path');
@@ -157,19 +169,20 @@ function showEmergencyOverlay() {
 }
 
 function drawHighlightedRoad() {
+  const { scaleX, scaleY } = getImageScales();
   // Path from room 3410 to exit-2 (main corridor, right vertical corridor)
   // Start at center of room 3410
-  const startX = 630; // room-3410 x + width/2
-  const startY = 210; // room-3410 y + height/2
+  const startX = 630 * scaleX; // room-3410 x + width/2
+  const startY = 210 * scaleY; // room-3410 y + height/2
   // Main corridor: (130, 240) to (930, 240)
   // Right vertical corridor: (910, 240) to (910, 350)
   // Exit-2: (870, 170)
   const points = [
     [startX, startY],
-    [630, 240], // move up to corridor
-    [930, 240], // right along main corridor
-    [930, 350], // down right vertical corridor
-    [870, 170]  // to exit-2
+    [630 * scaleX, 240 * scaleY], // move up to corridor
+    [930 * scaleX, 240 * scaleY], // right along main corridor
+    [930 * scaleX, 350 * scaleY], // down right vertical corridor
+    [870 * scaleX, 170 * scaleY]  // to exit-2
   ];
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   path.setAttribute('points', points.map(p => p.join(",")).join(" "));
@@ -215,28 +228,4 @@ setOverlaySize();
 showEmergencyOverlay();
 drawHighlightedRoad();
 
-// Compass rose rendering
-const compassRose = document.getElementById('compass-rose');
-compassRose.innerHTML = `
-  <svg viewBox="0 0 54 54">
-    <circle cx="27" cy="27" r="25" fill="#232837" stroke="#ffd600" stroke-width="2" />
-    <text x="27" y="13" text-anchor="middle" fill="#ffd600" font-size="10" font-family="Segoe UI,Arial" dy="3">N</text>
-    <text x="41" y="29" text-anchor="middle" fill="#b0b8c9" font-size="9" font-family="Segoe UI,Arial" dy="3">E</text>
-    <text x="27" y="47" text-anchor="middle" fill="#b0b8c9" font-size="9" font-family="Segoe UI,Arial" dy="3">S</text>
-    <text x="13" y="29" text-anchor="middle" fill="#b0b8c9" font-size="9" font-family="Segoe UI,Arial" dy="3">W</text>
-    <polygon id="compass-pointer" points="27,27 23,35 27,10 31,35" fill="#ffd600" stroke="#ffd600" stroke-width="1" />
-  </svg>
-`;
-const compassPointer = compassRose.querySelector('#compass-pointer');
-
-// Update compass pointer rotation with device orientation
-if (window.DeviceOrientationEvent) {
-  window.addEventListener('deviceorientation', function(event) {
-    if (typeof event.alpha === 'number') {
-      // North is up, so rotate pointer by -alpha
-      compassPointer.setAttribute('transform', `rotate(${-event.alpha} 27 27)`);
-      // Show current facing rotation (0 = North, 90 = East, etc.)
-      facingRotationEl.textContent = Math.round(event.alpha);
-    }
-  }, true);
-} 
+// Remove compass rose rendering and pointer update code 
