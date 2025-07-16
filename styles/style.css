@@ -33,8 +33,10 @@ h1 {
 
 .map-container {
   position: relative;
-  width: 800px;
-  height: 600px;
+  width: 100%;
+  max-width: 1000px;
+  /* Maintain original floor-plan aspect ratio (1350x500 ≈ 27/10) */
+  aspect-ratio: 1350 / 500;
   margin: 0 auto 20px;
   border: 2px solid #ddd;
   border-radius: 10px;
@@ -468,4 +470,82 @@ button:active {
   h1 {
     font-size: 1.4em;
   }
+} 
+
+/* =========================== */
+/* Dark Mode & Theme Toggle */
+/* =========================== */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.8);
+  border: none;
+  outline: none;
+  font-size: 1.2em;
+  padding: 10px 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+  z-index: 1100;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+body[data-theme="dark"] .theme-toggle {
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+}
+
+body[data-theme="dark"] {
+  background: linear-gradient(135deg, #2f2f2f 0%, #1c1c1c 100%);
+  color: #eee;
+}
+
+body[data-theme="dark"] #app {
+  background: #242424;
+  color: #eee;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+body[data-theme="dark"] h1 {
+  color: #ff8a65;
+  text-shadow: none;
+}
+
+/* Panel overrides */
+body[data-theme="dark"] #infoCard {
+  background: linear-gradient(45deg, #1565C0, #0D47A1);
+}
+
+body[data-theme="dark"] .route-panel {
+  background: linear-gradient(45deg, #388E3C, #2E7D32);
+}
+
+body[data-theme="dark"] .directions-panel {
+  background: linear-gradient(45deg, #F57C00, #EF6C00);
+}
+
+body[data-theme="dark"] #controlSection {
+  background: #303030;
+  color: #eee;
+  border-color: #424242;
+}
+
+body[data-theme="dark"] .room-selection {
+  background: #3A3A3A;
+}
+
+body[data-theme="dark"] .emergency-section {
+  background: rgba(211, 47, 47, 0.2);
+}
+
+body[data-theme="dark"] button {
+  background: linear-gradient(45deg, #1976D2, #0D47A1);
+}
+
+body[data-theme="dark"] .emergency-btn {
+  background: linear-gradient(45deg, #D32F2F, #B71C1C) !important;
 } 

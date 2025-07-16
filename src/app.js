@@ -10,6 +10,36 @@ let dashOffset = 0;
 let arrowPosition = { x: 0, y: 0, angle: 0 };
 let mapDisplayHeight = 600; // will be updated after image loads
 
+// =========================
+// 💡 Theme Toggle (Light / Dark)
+// =========================
+function setupThemeToggle() {
+  const toggleBtn = document.getElementById('themeToggle');
+  if (!toggleBtn) return;
+
+  const getPreferredTheme = () => {
+    const stored = localStorage.getItem('theme');
+    if (stored) return stored;
+    // Default to dark theme
+    return 'dark';
+  };
+
+  const applyTheme = (theme) => {
+    document.body.setAttribute('data-theme', theme);
+    toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  };
+
+  // Apply saved or system preference on load
+  applyTheme(getPreferredTheme());
+
+  // Toggle theme on button click
+  toggleBtn.addEventListener('click', () => {
+    const newTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    applyTheme(newTheme);
+  });
+}
+
 const user = {
   x: 400,
   y: 300,
@@ -82,6 +112,9 @@ function updateArrowPosition() {
 // Initialize the application
 async function init() {
   console.log('🚀 Initializing Enhanced Navigation System for Room 3412...');
+  
+  // Initialize theme toggle button
+  setupThemeToggle();
   
   canvas = document.getElementById('mapCanvas');
   ctx = canvas.getContext('2d');

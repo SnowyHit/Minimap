@@ -1,11 +1,11 @@
 {
   "_comment": "Room 3412 Green Line Exit Route - simplified path ending at main_corridor_end",
   "nodes": {
-    "3412": { "x": 520, "y": 120, "type": "room" },
-    "corridor_down": { "x": 520, "y": 50, "type": "corridor" },
-    "main_corridor_start": { "x": 178, "y": 50, "type": "corridor" },
-    "main_corridor_mid": { "x": 178, "y": 90, "type": "corridor" },
-    "main_corridor_end": { "x": 110, "y": 90, "type": "exit" }
+    "3412": { "x": 520, "y": 180, "type": "room" },
+    "corridor_down": { "x": 520, "y": 79, "type": "corridor" },
+    "main_corridor_start": { "x": 180, "y": 79, "type": "corridor" },
+    "main_corridor_mid": { "x": 180, "y": 148, "type": "corridor" },
+    "main_corridor_end": { "x": 100, "y": 148, "type": "exit" }
   },
   "edges": [
     ["3412", "corridor_down", 1],
