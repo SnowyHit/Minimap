@@ -1,84 +1,118 @@
-<svg width="800" height="600" viewBox="0 0 50 30" xmlns="http://www.w3.org/2000/svg">
+<svg width="800" height="600" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
-  <rect width="50" height="30" fill="#f5f5f5" stroke="#333" stroke-width="0.1"/>
+  <rect width="100" height="50" fill="#f8f8f8" stroke="#333" stroke-width="0.1"/>
   
-  <!-- Main corridor -->
-  <rect x="3" y="6" width="42" height="4" fill="#e8e8e8" stroke="#ccc" stroke-width="0.05"/>
+  <!-- Building outline -->
+  <rect x="1" y="6" width="96" height="38" fill="none" stroke="#000" stroke-width="0.2"/>
   
-  <!-- Rooms (left side) -->
-  <rect id="room-3419" x="1" y="23" width="4" height="5" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="3" y="26" font-size="0.8" text-anchor="middle" fill="#333">3419</text>
+  <!-- Main horizontal corridor (wider, more realistic) -->
+  <rect x="8" y="18" width="76" height="4" fill="#e8e8e8" stroke="#ccc" stroke-width="0.1"/>
   
-  <rect id="room-3418" x="1" y="18" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="3" y="20.5" font-size="0.8" text-anchor="middle" fill="#333">3418</text>
+  <!-- Vertical corridor on right (longer) -->
+  <rect x="78" y="8" width="4" height="30" fill="#e8e8e8" stroke="#ccc" stroke-width="0.1"/>
   
-  <rect id="room-3417" x="2" y="14" width="4" height="3" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="4" y="16" font-size="0.8" text-anchor="middle" fill="#333">3417</text>
+  <!-- Left wing corridor -->
+  <rect x="3" y="30" width="18" height="3" fill="#e8e8e8" stroke="#ccc" stroke-width="0.1"/>
   
-  <rect id="room-3416" x="2" y="11" width="4" height="3" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="4" y="13" font-size="0.8" text-anchor="middle" fill="#333">3416</text>
+  <!-- Wall elements for realism -->
+  <rect x="8" y="16" width="76" height="2" fill="#ddd" stroke="#bbb" stroke-width="0.05"/>
+  <rect x="8" y="22" width="76" height="2" fill="#ddd" stroke="#bbb" stroke-width="0.05"/>
   
-  <rect id="room-3415" x="2" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="4" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3415</text>
+  <!-- Stairs (red areas) -->
+  <rect id="stair-left" x="2" y="14" width="5" height="8" fill="#ffaaaa" stroke="#000" stroke-width="0.15" class="stair"/>
+  <text x="4.5" y="18.5" font-size="1" text-anchor="middle" fill="#000">STAIRS</text>
   
-  <!-- Central rooms -->
-  <rect id="room-3414" x="7" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="9" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3414</text>
+  <rect id="stair-right" x="82" y="14" width="5" height="8" fill="#ffaaaa" stroke="#000" stroke-width="0.15" class="stair"/>
+  <text x="84.5" y="18.5" font-size="1" text-anchor="middle" fill="#000">STAIRS</text>
   
-  <rect id="room-3412" x="11" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="13" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3412</text>
+  <!-- Left side rooms (3417-3419) - Better proportions -->
+  <rect id="room-3419" x="3" y="34" width="6" height="5" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="6" y="37" font-size="1.1" text-anchor="middle" fill="#333">3419</text>
   
-  <rect id="room-3411" x="15" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="17" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3411</text>
+  <rect id="room-3418" x="10" y="34" width="6" height="5" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="13" y="37" font-size="1.1" text-anchor="middle" fill="#333">3418</text>
   
-  <rect id="room-3410" x="19" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="21" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3410</text>
+  <!-- Top row rooms (3417 to 3407) - Better spacing -->
+  <rect id="room-3417" x="10" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="12.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3417</text>
   
-  <rect id="room-3409" x="23" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="25" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3409</text>
+  <rect id="room-3416" x="16" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="18.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3416</text>
   
-  <rect id="room-3408" x="27" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="29" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3408</text>
+  <rect id="room-3415" x="22" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="24.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3415</text>
   
-  <rect id="room-3407" x="31" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="33" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3407</text>
+  <rect id="room-3414" x="28" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="30.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3414</text>
   
-  <!-- Right side rooms -->
-  <rect id="room-3406" x="36" y="11" width="4" height="3" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="38" y="13" font-size="0.8" text-anchor="middle" fill="#333">3406</text>
+  <rect id="room-3412" x="34" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="36.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3412</text>
   
-  <rect id="room-3405" x="36" y="14" width="4" height="3" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="38" y="16" font-size="0.8" text-anchor="middle" fill="#333">3405</text>
+  <rect id="room-3411" x="40" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="42.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3411</text>
   
-  <rect id="room-3404" x="40" y="14" width="4" height="3" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="42" y="16" font-size="0.8" text-anchor="middle" fill="#333">3404</text>
+  <rect id="room-3410" x="46" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="48.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3410</text>
   
-  <rect id="room-3403" x="40" y="11" width="4" height="3" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="42" y="13" font-size="0.8" text-anchor="middle" fill="#333">3403</text>
+  <rect id="room-3409" x="52" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="54.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3409</text>
   
-  <rect id="room-3402" x="40" y="6" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="42" y="8.5" font-size="0.8" text-anchor="middle" fill="#333">3402</text>
+  <rect id="room-3408" x="58" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="60.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3408</text>
   
-  <rect id="room-3401" x="44" y="3" width="4" height="4" fill="#fff" stroke="#333" stroke-width="0.1" class="room"/>
-  <text x="46" y="5.5" font-size="0.8" text-anchor="middle" fill="#333">3401</text>
+  <rect id="room-3407" x="64" y="8" width="5" height="7" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="66.5" y="12" font-size="1.1" text-anchor="middle" fill="#333">3407</text>
   
-  <!-- Emergency exits -->
-  <rect id="exit-north" x="46" y="0" width="3" height="2" fill="#ff4444" stroke="#000" stroke-width="0.1" class="exit"/>
-  <text x="47.5" y="1.2" font-size="0.6" text-anchor="middle" fill="#fff">EXIT</text>
+  <!-- Right side rooms (vertical layout) - Better positioning -->
+  <rect id="room-3406" x="84" y="24" width="7" height="5" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="87.5" y="27" font-size="1.1" text-anchor="middle" fill="#333">3406</text>
   
-  <rect id="exit-south" x="46" y="28" width="3" height="2" fill="#ff4444" stroke="#000" stroke-width="0.1" class="exit"/>
-  <text x="47.5" y="29.2" font-size="0.6" text-anchor="middle" fill="#fff">EXIT</text>
+  <rect id="room-3405" x="84" y="30" width="7" height="5" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="87.5" y="33" font-size="1.1" text-anchor="middle" fill="#333">3405</text>
   
-  <rect id="exit-west" x="0" y="13" width="2" height="3" fill="#ff4444" stroke="#000" stroke-width="0.1" class="exit"/>
-  <text x="1" y="15" font-size="0.6" text-anchor="middle" fill="#fff">EXIT</text>
+  <rect id="room-3404" x="84" y="36" width="7" height="5" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="87.5" y="39" font-size="1.1" text-anchor="middle" fill="#333">3404</text>
   
-  <!-- Stairs -->
-  <rect id="stair-main" x="33" y="13" width="4" height="4" fill="#44ff44" stroke="#000" stroke-width="0.1" class="stair"/>
-  <text x="35" y="15.5" font-size="0.6" text-anchor="middle" fill="#000">STAIRS</text>
+  <rect id="room-3403" x="84" y="42" width="7" height="5" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="87.5" y="45" font-size="1.1" text-anchor="middle" fill="#333">3403</text>
+  
+  <rect id="room-3402" x="70" y="24" width="7" height="5" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="73.5" y="27" font-size="1.1" text-anchor="middle" fill="#333">3402</text>
+  
+  <!-- Room 3401 at top-right corner -->
+  <rect id="room-3401" x="88" y="2" width="8" height="6" fill="#fff" stroke="#333" stroke-width="0.15" class="room"/>
+  <text x="92" y="5.5" font-size="1.1" text-anchor="middle" fill="#333">3401</text>
+  
+  <!-- Emergency exits (bright green) -->
+  <rect id="exit-north" x="92" y="0" width="4" height="2" fill="#00dd00" stroke="#000" stroke-width="0.1" class="exit"/>
+  <text x="94" y="1.3" font-size="0.8" text-anchor="middle" fill="#000">EXIT</text>
+  
+  <rect id="exit-south" x="92" y="48" width="4" height="2" fill="#00dd00" stroke="#000" stroke-width="0.1" class="exit"/>
+  <text x="94" y="49.3" font-size="0.8" text-anchor="middle" fill="#000">EXIT</text>
+  
+  <rect id="exit-west" x="0" y="19" width="2" height="4" fill="#00dd00" stroke="#000" stroke-width="0.1" class="exit"/>
+  <text x="1" y="21.5" font-size="0.8" text-anchor="middle" fill="#000">EXIT</text>
+  
+  <!-- Fire extinguishers (more realistic size and placement) -->
+  <circle cx="8.5" cy="20" r="1" fill="#ff4444" stroke="#000" stroke-width="0.1"/>
+  <text x="8.5" y="20.3" font-size="0.6" text-anchor="middle" fill="#fff">FE</text>
+  
+  <circle cx="72" cy="20" r="1" fill="#ff4444" stroke="#000" stroke-width="0.1"/>
+  <text x="72" y="20.3" font-size="0.6" text-anchor="middle" fill="#fff">FE</text>
+  
+  <!-- Additional architectural details -->
+  <rect x="17" y="33" width="2" height="1" fill="#666"/>  <!-- Support column -->
+  <rect x="75" y="33" width="2" height="1" fill="#666"/>  <!-- Support column -->
   
   <style>
     .room:hover { fill: #e3f2fd; cursor: pointer; }
-    .exit { opacity: 0.9; }
+    .exit { opacity: 0.9; animation: pulse 2s infinite; }
     .stair { opacity: 0.8; }
+    text { font-family: Arial, sans-serif; }
+    @keyframes pulse {
+      0% { opacity: 0.9; }
+      50% { opacity: 0.6; }
+      100% { opacity: 0.9; }
+    }
   </style>
 </svg> 
