@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚨 Acil Durum Yönlendirme Sistemi</title>
+  <title>🚨 Acil Durum Yönlendirme - Oda 3412</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles/style.css">
   <!-- GSAP Animation Library -->
@@ -11,16 +11,16 @@
 </head>
 <body>
   <div id="app">
-    <h1>🚨 Acil Durum Çıkış Planı</h1>
-    <div class="map-container">
-      <img id="mapImage" src="floor-plan.png" alt="Kat Planı" style="width: 800px; height: 600px; position: absolute; z-index: 1;">
-      <canvas id="mapCanvas" width="800" height="600" aria-label="Harita" style="position: absolute; z-index: 2; background: transparent;"></canvas>
+    <h1>🚨 Acil Durum Çıkış Planı - Oda 3412</h1>
+    <div class="map-container" style="position: relative; width: 100%; max-width: 1000px; margin: 0 auto; border: 2px solid #ddd; border-radius: 8px; overflow: hidden;">
+      <img id="mapImage" src="floor-plan.png" alt="Kat Planı - Oda 3412 Yeşil Çizgi Rotası" style="width: 100%; height: auto; display: block; z-index: 1;">
+      <canvas id="mapCanvas" aria-label="Harita" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background: transparent; pointer-events: none;"></canvas>
     </div>
     
-    <!-- Simplified Info Card -->
+    <!-- Simplified Info Card for Room 3412 -->
     <section id="infoCard" aria-label="Konum Bilgileri">
       <div id="info">
-        <div class="info-block"><span class="info-label">📍 Mevcut Konum</span><span id="roomName">-</span></div>
+        <div class="info-block"><span class="info-label">📍 Mevcut Konum</span><span id="roomName">3412</span></div>
         <div class="info-block"><span class="info-label">🎯 Hedef Çıkış</span><span id="targetExit">-</span></div>
         <div class="info-block"><span class="info-label">📏 Mesafe</span><span id="totalDistance">-</span></div>
       </div>
@@ -29,7 +29,7 @@
     <!-- Route Information Panel -->
     <section id="routePanel" class="route-panel" style="display: none;">
       <div class="route-header">
-        <h3>🎯 Kaçış Rotası</h3>
+        <h3>🎯 Oda 3412 - Kaçış Rotası</h3>
         <div id="routeStats">
           <span id="routeDistance">-</span> metre • 
           <span id="estimatedTime">-</span> saniye
@@ -40,7 +40,7 @@
         <div class="progress-bar">
           <div id="progressFill" class="progress-fill"></div>
         </div>
-        <div id="progressText">En hızlı kaçış rotası hesaplandı</div>
+        <div id="progressText">Oda 3412 için en hızlı kaçış rotası</div>
       </div>
     </section>
 
@@ -49,7 +49,7 @@
       <div class="current-instruction">
         <div id="currentStep" class="step-instruction">
           <div class="step-icon">🎯</div>
-          <div class="step-text">Rotanız hazırlanıyor...</div>
+          <div class="step-text">Oda 3412'den rotanız hazırlanıyor...</div>
         </div>
       </div>
       <div class="next-steps">
@@ -62,20 +62,20 @@
     <div id="emergencyAlert" class="emergency-alert" style="display: none;">
       <div class="alert-content">
         <div class="alert-icon">⚠️</div>
-        <div class="alert-text">ACİL DURUM! En yakın çıkışa yönlendiriliyorsunuz</div>
+        <div class="alert-text">ACİL DURUM! Oda 3412'den en yakın çıkışa yönlendiriliyorsunuz</div>
       </div>
     </div>
     
     <section id="controlSection">
-      <h3>🏨 Oda Seçimi</h3>
+      <h3>🏨 Oda 3412 - Çıkış Yönlendirme</h3>
       <div class="room-selection">
         <label for="roomInput">Bulunduğunuz oda numarası:</label>
-        <input type="text" id="roomInput" placeholder="ör. 3401" aria-label="Oda Numarası">
-        <button id="startBtn">🎯 Kaçış Rotası Hesapla</button>
+        <input type="text" id="roomInput" value="3412" readonly aria-label="Oda Numarası" style="background-color: #f0f0f0;">
+        <button id="startBtn" disabled style="opacity: 0.7;">🎯 Otomatik Başlatıldı</button>
       </div>
       <div class="emergency-section">
         <button id="emergencyBtn" class="emergency-btn">🚨 ACİL DURUM MODU</button>
-        <p class="demo-note">⚡ Demo: WASD tuşları ile hareket edebilirsiniz</p>
+        <p class="demo-note">⚡ Yeşil çizgi üzerinden en güvenli rota gösteriliyor</p>
       </div>
     </section>
   </div>

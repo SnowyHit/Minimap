@@ -1,96 +1,16 @@
 {
-  "_comment": "Enhanced corridor network to prevent routes cutting through rooms",
+  "_comment": "Room 3412 Green Line Exit Route - simplified path ending at main_corridor_end",
   "nodes": {
-    "3417": { "x": 12, "y": 8, "type": "room" },
-    "3416": { "x": 18, "y": 8, "type": "room" },
-    "3415": { "x": 24, "y": 8, "type": "room" },
-    "3414": { "x": 30, "y": 8, "type": "room" },
-    "3412": { "x": 37, "y": 12, "type": "room" },
-    "3411": { "x": 42, "y": 8, "type": "room" },
-    "3410": { "x": 48, "y": 8, "type": "room" },
-    "3409": { "x": 54, "y": 8, "type": "room" },
-    "3408": { "x": 60, "y": 8, "type": "room" },
-    "3407": { "x": 66, "y": 8, "type": "room" },
-    
-    "3418": { "x": 6, "y": 38, "type": "room" },
-    "3419": { "x": 12, "y": 46, "type": "room" },
-    
-    "3401": { "x": 75, "y": 12, "type": "room" },
-    "3402": { "x": 75, "y": 18, "type": "room" },
-    "3403": { "x": 75, "y": 24, "type": "room" },
-    "3404": { "x": 75, "y": 30, "type": "room" },
-    "3405": { "x": 75, "y": 36, "type": "room" },
-    "3406": { "x": 75, "y": 42, "type": "room" },
-    
-    "corridor_1": { "x": 12, "y": 20, "type": "corridor" },
-    "corridor_2": { "x": 18, "y": 20, "type": "corridor" },
-    "corridor_3": { "x": 24, "y": 20, "type": "corridor" },
-    "corridor_4": { "x": 30, "y": 20, "type": "corridor" },
-    "corridor_5": { "x": 36, "y": 20, "type": "corridor" },
-    "corridor_6": { "x": 42, "y": 20, "type": "corridor" },
-    "corridor_7": { "x": 48, "y": 20, "type": "corridor" },
-    "corridor_8": { "x": 54, "y": 20, "type": "corridor" },
-    "corridor_9": { "x": 60, "y": 20, "type": "corridor" },
-    "corridor_10": { "x": 66, "y": 20, "type": "corridor" },
-    
-    "corridor_vertical_1": { "x": 71, "y": 12, "type": "corridor" },
-    "corridor_vertical_2": { "x": 71, "y": 18, "type": "corridor" },
-    "corridor_vertical_3": { "x": 71, "y": 24, "type": "corridor" },
-    "corridor_vertical_4": { "x": 71, "y": 30, "type": "corridor" },
-    "corridor_vertical_5": { "x": 71, "y": 36, "type": "corridor" },
-    "corridor_vertical_6": { "x": 71, "y": 42, "type": "corridor" },
-    
-    "corridor_left_1": { "x": 6, "y": 20, "type": "corridor" },
-    "corridor_left_2": { "x": 9, "y": 20, "type": "corridor" },
-    
-    "exit_left": { "x": 2, "y": 20, "type": "exit" },
-    "exit_right_top": { "x": 80, "y": 8, "type": "exit" },
-    "exit_right_bottom": { "x": 80, "y": 42, "type": "exit" }
+    "3412": { "x": 520, "y": 80, "type": "room" },
+    "corridor_down": { "x": 520, "y": 50, "type": "corridor" },
+    "main_corridor_start": { "x": 178, "y": 50, "type": "corridor" },
+    "main_corridor_mid": { "x": 178, "y": 90, "type": "corridor" },
+    "main_corridor_end": { "x": 110, "y": 90, "type": "exit" }
   },
   "edges": [
-    ["3417", "corridor_1", 1],
-    ["3416", "corridor_2", 1],
-    ["3415", "corridor_3", 1],
-    ["3414", "corridor_4", 1],
-    ["3412", "corridor_5", 1],
-    ["3411", "corridor_6", 1],
-    ["3410", "corridor_7", 1],
-    ["3409", "corridor_8", 1],
-    ["3408", "corridor_9", 1],
-    ["3407", "corridor_10", 1],
-    
-    ["3418", "corridor_left_1", 1],
-    ["3419", "corridor_left_2", 1],
-    
-    ["3401", "corridor_vertical_1", 1],
-    ["3402", "corridor_vertical_2", 1],
-    ["3403", "corridor_vertical_3", 1],
-    ["3404", "corridor_vertical_4", 1],
-    ["3405", "corridor_vertical_5", 1],
-    ["3406", "corridor_vertical_6", 1],
-    
-    ["corridor_left_1", "corridor_left_2", 1],
-    ["corridor_left_2", "corridor_1", 1],
-    ["corridor_1", "corridor_2", 1],
-    ["corridor_2", "corridor_3", 1],
-    ["corridor_3", "corridor_4", 1],
-    ["corridor_4", "corridor_5", 1],
-    ["corridor_5", "corridor_6", 1],
-    ["corridor_6", "corridor_7", 1],
-    ["corridor_7", "corridor_8", 1],
-    ["corridor_8", "corridor_9", 1],
-    ["corridor_9", "corridor_10", 1],
-    
-    ["corridor_vertical_1", "corridor_vertical_2", 1],
-    ["corridor_vertical_2", "corridor_vertical_3", 1],
-    ["corridor_vertical_3", "corridor_vertical_4", 1],
-    ["corridor_vertical_4", "corridor_vertical_5", 1],
-    ["corridor_vertical_5", "corridor_vertical_6", 1],
-    
-    ["corridor_10", "corridor_vertical_3", 1],
-    
-    ["corridor_left_1", "exit_left", 1],
-    ["corridor_vertical_1", "exit_right_top", 1],
-    ["corridor_vertical_6", "exit_right_bottom", 1]
+    ["3412", "corridor_down", 1],
+    ["corridor_down", "main_corridor_start", 1],
+    ["main_corridor_start", "main_corridor_mid", 1],
+    ["main_corridor_mid", "main_corridor_end", 1]
   ]
 } 

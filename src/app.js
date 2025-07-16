@@ -1,4 +1,4 @@
-// Enhanced Indoor Navigation System with GSAP Animations
+// Enhanced Indoor Navigation System with GSAP Animations - Auto-start for Room 3412
 let canvas, ctx;
 let rooms = {};
 let currentPath = [];
@@ -14,7 +14,7 @@ const user = {
   x: 400,
   y: 300,
   direction: 0,
-  currentRoom: null,
+  currentRoom: "3412", // Auto-set to room 3412
   targetExit: null
 };
 
@@ -81,40 +81,90 @@ function updateArrowPosition() {
 
 // Initialize the application
 async function init() {
-  console.log('🚀 Initializing Enhanced Navigation System...');
+  console.log('🚀 Initializing Enhanced Navigation System for Room 3412...');
   
   canvas = document.getElementById('mapCanvas');
   ctx = canvas.getContext('2d');
   
-  // Adjust canvas height once background image is loaded to keep coordinates aligned
+  // Setup responsive canvas to match floor-plan.png dimensions
   const mapImg = document.getElementById('mapImage');
-  if (mapImg && !mapImg.complete) {
-    mapImg.addEventListener('load', resizeCanvasToImage);
-  } else if (mapImg) {
-    // Image already cached
-    resizeCanvasToImage();
-  }
   
-  async function resizeCanvasToImage() {
-    const scale = canvas.width / mapImg.naturalWidth;
-    canvas.height = Math.round(mapImg.naturalHeight * scale);
+  function setupResponsiveCanvas() {
+    const container = document.querySelector('.map-container');
+    const containerRect = container.getBoundingClientRect();
+    
+    // Set canvas dimensions to match container
+    canvas.width = containerRect.width;
+    canvas.height = containerRect.height;
     mapDisplayHeight = canvas.height;
-    // Ensure container respects new height
-    canvas.style.height = `${canvas.height}px`;
-    // Redraw with new scale
+    
+    // Update canvas style to fill container
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    
     draw();
   }
+  
+  if (mapImg && !mapImg.complete) {
+    mapImg.addEventListener('load', setupResponsiveCanvas);
+  } else if (mapImg) {
+    setupResponsiveCanvas();
+  }
+  
+  // Handle window resize
+  window.addEventListener('resize', setupResponsiveCanvas);
   
   try {
     await loadRoomData();
     setupEventListeners();
     initializeGSAPAnimations();
     startDashAnimation();
+    
+    // Auto-start navigation for room 3412
+    await autoStartRoom3412();
+    
     draw();
-    console.log('✅ System initialized successfully');
+    console.log('✅ System initialized successfully for Room 3412');
   } catch (error) {
     console.error('❌ Initialization failed:', error);
   }
+}
+
+// Auto-start navigation for room 3412
+async function autoStartRoom3412() {
+  console.log('🎯 Auto-starting navigation for Room 3412...');
+  
+  const roomId = "3412";
+  
+  if (!rooms[roomId]) {
+    console.error('❌ Room 3412 not found in data!');
+    return;
+  }
+  
+  // Set room input value
+  document.getElementById('roomInput').value = roomId;
+  
+  // Reset route info
+  user.targetExit = null;
+  currentPath = [];
+  currentRouteInstructions = [];
+  
+  user.currentRoom = roomId;
+  const startRoom = rooms[roomId];
+  const canvasPos = realToCanvas(startRoom.x, startRoom.y);
+  
+  user.x = canvasPos.x;
+  user.y = canvasPos.y;
+  
+  // Update UI immediately
+  updateUI();
+  
+  // Calculate and show route with a slight delay for better UX
+  setTimeout(() => {
+    calculateAndShowRoute();
+  }, 500);
+  
+  console.log(`📍 Auto-navigation started for room ${roomId}`);
 }
 
 // Load room data with enhanced error handling
@@ -244,7 +294,7 @@ function calculateAndShowRoute(isEmergency = false) {
   showDirectionsPanel();
   animatePathDrawing();
   
-  console.log(`🗺️ Route calculated: ${currentPath.length} waypoints to ${user.targetExit}`);
+  console.log(`🗺️ Green line route calculated for Room 3412: ${currentPath.length} waypoints to ${user.targetExit}`);
 }
 
 // Enhanced Dijkstra pathfinding
@@ -560,14 +610,11 @@ function animateRouteMarkers() {
   });
 }
 
-// Enhanced drawing function with animations
+// Enhanced drawing function with beautiful animations
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // Load and draw SVG map (simplified for this example)
-  drawMap();
-  
-  // Draw animated route
+  // Draw animated route with green line
   if (currentPath.length > 0) {
     drawAnimatedRoute();
   }
@@ -576,16 +623,7 @@ function draw() {
   drawUser();
 }
 
-// Draw the map (hidden - only background image visible, SVG used for pathfinding)
-function drawMap() {
-  // Clear canvas with transparent background
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // SVG coordinate system and rooms data still used for pathfinding
-  // but no visual elements drawn here - PNG image shows in background
-}
-
-// Draw animated route path with dashed lines and moving arrow
+// Draw animated route path with dashed green lines and moving arrow
 function drawAnimatedRoute() {
   if (currentPath.length < 2) return;
   
@@ -595,19 +633,20 @@ function drawAnimatedRoute() {
   const totalSegments = currentPath.length - 1;
   const animatedSegments = animatedPathProgress * totalSegments;
   
-  // Set up dashed line style
-  const dashArray = isEmergencyMode ? [15, 10] : [20, 8];
+  // Enhanced green line style for Room 3412
+  const dashArray = isEmergencyMode ? [15, 10] : [25, 12];
   ctx.setLineDash(dashArray);
   ctx.lineDashOffset = -dashOffset; // Negative for forward animation
   
-  ctx.strokeStyle = isEmergencyMode ? '#f44336' : '#4CAF50';
-  ctx.lineWidth = 6;
+  // Room 3412 specific green line styling
+  ctx.strokeStyle = isEmergencyMode ? '#f44336' : '#00FF00'; // Bright green for visibility
+  ctx.lineWidth = 8; // Thicker line for better visibility
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   
-  // Add outer glow
+  // Enhanced glow effect for green line
   ctx.shadowColor = ctx.strokeStyle;
-  ctx.shadowBlur = 20;
+  ctx.shadowBlur = 25;
   
   // Draw the main path
   ctx.beginPath();
@@ -648,11 +687,11 @@ function drawAnimatedRoute() {
   
   ctx.stroke();
   
-  // Draw solid background line for better visibility
+  // Draw solid green background line for better visibility on Room 3412 path
   ctx.setLineDash([]); // Remove dash
   ctx.shadowBlur = 0;
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = isEmergencyMode ? 'rgba(244, 67, 54, 0.3)' : 'rgba(76, 175, 80, 0.3)';
+  ctx.lineWidth = 4; // Slightly thicker background
+  ctx.strokeStyle = isEmergencyMode ? 'rgba(244, 67, 54, 0.4)' : 'rgba(0, 255, 0, 0.4)'; // Enhanced green transparency
   ctx.stroke();
   
   // Draw animated arrow only after path is completely drawn
@@ -665,6 +704,8 @@ function drawAnimatedRoute() {
   
   ctx.restore();
 }
+
+// Simplified function - now handled in drawGreenLineRoute()
 
 // Draw the moving arrow at the tip
 function drawMovingArrow() {
@@ -680,9 +721,9 @@ function drawMovingArrow() {
   const arrowSize = 25;
   const arrowWidth = 15;
   
-  // Arrow shadow/glow
-  ctx.shadowColor = isEmergencyMode ? '#f44336' : '#4CAF50';
-  ctx.shadowBlur = 15;
+  // Enhanced arrow shadow/glow for Room 3412 green line
+  ctx.shadowColor = isEmergencyMode ? '#f44336' : '#00C851';
+  ctx.shadowBlur = 18; // Increased glow
   
   // Draw arrow body
   ctx.beginPath();
@@ -692,14 +733,14 @@ function drawMovingArrow() {
   ctx.lineTo(-arrowSize * 0.6, arrowWidth * 0.5);
   ctx.closePath();
   
-  // Fill arrow
+  // Enhanced green gradient for Room 3412 arrow
   const gradient = ctx.createLinearGradient(-arrowSize, 0, arrowSize, 0);
   if (isEmergencyMode) {
     gradient.addColorStop(0, '#ff5722');
     gradient.addColorStop(1, '#f44336');
   } else {
-    gradient.addColorStop(0, '#66bb6a');
-    gradient.addColorStop(1, '#4caf50');
+    gradient.addColorStop(0, '#00E676'); // Brighter green start
+    gradient.addColorStop(1, '#00C851'); // Vibrant green end
   }
   
   ctx.fillStyle = gradient;
@@ -917,18 +958,20 @@ function handleKeyboard(event) {
   }
 }
 
-// Utility functions
-function realToCanvas(realX, realY) {
+// Utility functions for floor-plan.png coordinate conversion
+function realToCanvas(imgX, imgY) {
+  // floor-plan.png is 1350x500 pixels, convert to canvas pixels
   return {
-    x: (realX / 100) * canvas.width,
-    y: (realY / 75) * mapDisplayHeight
+    x: (imgX / 1350) * canvas.width,
+    y: (imgY / 500) * canvas.height
   };
 }
 
 function canvasToReal(canvasX, canvasY) {
+  // Convert canvas pixels back to floor-plan.png coordinates
   return {
-    x: (canvasX / canvas.width) * 100,
-    y: (canvasY / mapDisplayHeight) * 75
+    x: (canvasX / canvas.width) * 1350,
+    y: (canvasY / canvas.height) * 500
   };
 }
 

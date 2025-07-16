@@ -1,244 +1,169 @@
-<svg width="800" height="600" viewBox="0 0 100 75" xmlns="http://www.w3.org/2000/svg">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1350" height="500" viewBox="0 0 1350 500" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
-  <rect width="100" height="75" fill="#f8f9fa" stroke="#333" stroke-width="0.1"/>
+  <rect width="1350" height="500" fill="#f8f9fa" stroke="#333" stroke-width="2"/>
   
   <!-- Building outline -->
-  <rect x="2" y="8" width="96" height="59" fill="none" stroke="#000" stroke-width="0.3"/>
+  <rect x="50" y="50" width="1250" height="400" fill="none" stroke="#000" stroke-width="3"/>
   
-  <!-- LEFT WING - Staircase and service areas -->
-  <g id="leftWing">
-    <!-- Main staircase -->
-    <rect x="3" y="10" width="12" height="20" fill="#e9ecef" stroke="#666" stroke-width="0.2"/>
-    <text x="9" y="20" text-anchor="middle" font-size="2" fill="#666">MERDIVEN</text>
-    
-    <!-- Stair steps representation -->
-    <g stroke="#999" stroke-width="0.1">
-      <line x1="4" y1="12" x2="14" y2="12"/>
-      <line x1="4" y1="14" x2="14" y2="14"/>
-      <line x1="4" y1="16" x2="14" y2="16"/>
-      <line x1="4" y1="18" x2="14" y2="18"/>
-      <line x1="4" y1="20" x2="14" y2="20"/>
-      <line x1="4" y1="22" x2="14" y2="22"/>
-      <line x1="4" y1="24" x2="14" y2="24"/>
-      <line x1="4" y1="26" x2="14" y2="26"/>
-      <line x1="4" y1="28" x2="14" y2="28"/>
-    </g>
-    
-    <!-- Emergency exit from stairs -->
-    <rect x="3" y="32" width="8" height="6" fill="#c8e6c9" stroke="#4caf50" stroke-width="0.3"/>
-    <text x="7" y="35.5" text-anchor="middle" font-size="1.5" fill="#2e7d32">ÇIKIŞ</text>
-    
-    <!-- Service rooms below stairs -->
-    <rect x="3" y="40" width="6" height="8" fill="#fff3e0" stroke="#999" stroke-width="0.2"/>
-    <text x="6" y="44.5" text-anchor="middle" font-size="1.2" fill="#666">SERVİS</text>
-    
-    <rect x="9" y="40" width="6" height="8" fill="#fff3e0" stroke="#999" stroke-width="0.2"/>
-    <text x="12" y="44.5" text-anchor="middle" font-size="1.2" fill="#666">DEPO</text>
-  </g>
+  <!-- LEFT STAIRCASE AND ROOMS -->
+  <!-- Staircase (3419) -->
+  <rect x="60" y="320" width="120" height="120" fill="#e9ecef" stroke="#666" stroke-width="2"/>
+  <text x="120" y="385" text-anchor="middle" font-size="24" fill="#666" font-weight="bold">3419</text>
   
-  <!-- MAIN HORIZONTAL CORRIDOR -->
-  <rect x="16" y="25" width="68" height="6" fill="#f5f5f5" stroke="#ddd" stroke-width="0.1"/>
+  <!-- Room 3418 -->
+  <rect x="60" y="80" width="120" height="200" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="120" y="185" text-anchor="middle" font-size="24" fill="#1976d2" font-weight="bold">3418</text>
   
-  <!-- TOP ROW ROOMS (3417-3407) -->
-  <g id="topRooms">
-    <!-- Room 3417 -->
-    <rect x="18" y="10" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="22" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3417</text>
-    
-    <!-- Room 3416 -->
-    <rect x="27" y="10" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="31" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3416</text>
-    
-    <!-- Room 3415 -->
-    <rect x="36" y="10" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="40" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3415</text>
-    
-    <!-- Room 3414 -->
-    <rect x="45" y="10" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="49" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3414</text>
-    
-    <!-- Room 3413 -->
-    <rect x="54" y="10" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="58" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3413</text>
-    
-    <!-- Room 3412 -->
-    <rect x="63" y="10" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="67" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3412</text>
-    
-    <!-- Room 3411 -->
-    <rect x="72" y="10" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="76" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3411</text>
-    
-    <!-- Room 3410 -->
-    <rect x="81" y="10" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="85" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3410</text>
-    
-    <!-- Room 3409 -->
-    <rect x="90" y="10" width="7" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="93.5" y="16.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3409</text>
-  </g>
+  <!-- MAIN CORRIDOR -->
+  <rect x="200" y="250" width="900" height="80" fill="#f5f5f5" stroke="#ddd" stroke-width="2"/>
   
-  <!-- BOTTOM ROW ROOMS (3418-3408) -->
-  <g id="bottomRooms">
-    <!-- Room 3418 -->
-    <rect x="18" y="33" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="22" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3418</text>
-    
-    <!-- Room 3419 -->
-    <rect x="27" y="33" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="31" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3419</text>
-    
-    <!-- Room 3420 -->
-    <rect x="36" y="33" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="40" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3420</text>
-    
-    <!-- Room 3421 -->
-    <rect x="45" y="33" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="49" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3421</text>
-    
-    <!-- Room 3422 -->
-    <rect x="54" y="33" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="58" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3422</text>
-    
-    <!-- Room 3423 -->
-    <rect x="63" y="33" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="67" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3423</text>
-    
-    <!-- Room 3424 -->
-    <rect x="72" y="33" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="76" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3424</text>
-    
-    <!-- Room 3408 -->
-    <rect x="81" y="33" width="8" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="85" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3408</text>
-    
-    <!-- Room 3407 -->
-    <rect x="90" y="33" width="7" height="13" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="93.5" y="39.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3407</text>
-  </g>
+  <!-- TOP ROW ROOMS -->
+  <!-- Room 3417 -->
+  <rect x="220" y="80" width="100" height="150" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="270" y="160" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3417</text>
+  
+  <!-- Room 3416 -->
+  <rect x="340" y="80" width="100" height="150" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="390" y="160" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3416</text>
+  
+  <!-- Room 3415 -->
+  <rect x="460" y="80" width="100" height="150" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="510" y="160" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3415</text>
+  
+  <!-- Room 3414 -->
+  <rect x="580" y="80" width="100" height="150" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="630" y="160" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3414</text>
+  
+  <!-- Room 3412 - HIGHLIGHTED -->
+  <rect x="700" y="80" width="100" height="150" fill="#e8f5e8" stroke="#00FF00" stroke-width="4"/>
+  <text x="750" y="160" text-anchor="middle" font-size="20" fill="#00AA00" font-weight="bold">3412</text>
+  
+  <!-- Room 3411 -->
+  <rect x="820" y="80" width="100" height="150" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="870" y="160" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3411</text>
+  
+  <!-- Room 3410 -->
+  <rect x="940" y="80" width="100" height="150" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="990" y="160" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3410</text>
+  
+  <!-- Room 3409 -->
+  <rect x="1060" y="80" width="100" height="150" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="1110" y="160" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3409</text>
+  
+  <!-- Room 3408 -->
+  <rect x="1180" y="80" width="100" height="150" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="1230" y="160" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3408</text>
+  
+  <!-- Room 3407 -->
+  <rect x="1180" y="250" width="100" height="120" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="1230" y="315" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3407</text>
   
   <!-- RIGHT WING ROOMS -->
-  <g id="rightWingRooms">
-    <!-- Room 3406 -->
-    <rect x="84" y="48" width="13" height="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="90.5" y="52.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3406</text>
-    
-    <!-- Room 3405 -->
-    <rect x="71" y="48" width="12" height="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="77" y="52.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3405</text>
-    
-    <!-- Room 3404 -->
-    <rect x="58" y="48" width="12" height="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="64" y="52.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3404</text>
-    
-    <!-- Room 3403 -->
-    <rect x="45" y="48" width="12" height="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="51" y="52.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3403</text>
-    
-    <!-- Room 3402 -->
-    <rect x="32" y="48" width="12" height="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="38" y="52.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3402</text>
-    
-    <!-- Room 3401 -->
-    <rect x="19" y="48" width="12" height="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.2"/>
-    <text x="25" y="52.5" text-anchor="middle" font-size="2" fill="#1976d2" font-weight="bold">3401</text>
-  </g>
+  <!-- Room 3406 -->
+  <rect x="1120" y="370" width="160" height="70" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="1200" y="410" text-anchor="middle" font-size="20" fill="#1976d2" font-weight="bold">3406</text>
   
-  <!-- VERTICAL CORRIDORS -->
-  <!-- Right side vertical corridor -->
-  <rect x="84" y="57" width="6" height="9" fill="#f5f5f5" stroke="#ddd" stroke-width="0.1"/>
+  <!-- Room 3405 -->
+  <rect x="1120" y="330" width="80" height="100" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="1160" y="385" text-anchor="middle" font-size="18" fill="#1976d2" font-weight="bold">3405</text>
   
-  <!-- Connection corridors -->
-  <rect x="16" y="48" width="3" height="8" fill="#f5f5f5" stroke="#ddd" stroke-width="0.1"/>
-  <rect x="84" y="25" width="6" height="8" fill="#f5f5f5" stroke="#ddd" stroke-width="0.1"/>
+  <!-- Room 3404 -->
+  <rect x="1200" y="330" width="80" height="100" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="1240" y="385" text-anchor="middle" font-size="18" fill="#1976d2" font-weight="bold">3404</text>
   
-  <!-- RIGHT SIDE EXITS -->
-  <g id="rightExits">
-    <!-- Main exit at end of corridor -->
-    <rect x="87" y="58" width="8" height="7" fill="#c8e6c9" stroke="#4caf50" stroke-width="0.3"/>
-    <text x="91" y="62" text-anchor="middle" font-size="1.5" fill="#2e7d32" font-weight="bold">ÇIKIŞ</text>
+  <!-- Room 3403 -->
+  <rect x="1000" y="350" width="100" height="90" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="1050" y="400" text-anchor="middle" font-size="18" fill="#1976d2" font-weight="bold">3403</text>
+  
+  <!-- Room 3402 -->
+  <rect x="880" y="350" width="100" height="90" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="930" y="400" text-anchor="middle" font-size="18" fill="#1976d2" font-weight="bold">3402</text>
+  
+  <!-- Room 3401 -->
+  <rect x="760" y="350" width="100" height="90" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="810" y="400" text-anchor="middle" font-size="18" fill="#1976d2" font-weight="bold">3401</text>
+  
+  <!-- EXIT - RIGHT SIDE -->
+  <rect x="1300" y="320" width="40" height="60" fill="#ffcdd2" stroke="#f44336" stroke-width="3"/>
+  <text x="1320" y="355" text-anchor="middle" font-size="16" fill="#c62828" font-weight="bold">EXIT</text>
+  
+  <!-- GREEN LINE ROUTE FROM ROOM 3412 TO EXIT -->
+  <defs>
+    <marker id="greenArrow" markerWidth="15" markerHeight="15" refX="12" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L2,11 L10,6 z" fill="#00FF00" stroke="#00AA00" stroke-width="1"/>
+    </marker>
+  </defs>
+  
+  <!-- GREEN LINE PATH -->
+  <g id="greenRoute" stroke="#00FF00" stroke-width="8" fill="none" opacity="0.9">
+    <!-- Step 1: From room 3412 door to corridor -->
+    <path d="M 750 230 L 750 270" marker-end="url(#greenArrow)"/>
     
-    <!-- Secondary stairwell -->
-    <rect x="91" y="25" width="6" height="15" fill="#e9ecef" stroke="#666" stroke-width="0.2"/>
-    <text x="94" y="33" text-anchor="middle" font-size="1.2" fill="#666">MERDİVEN</text>
+    <!-- Step 2: Along main corridor to the right -->
+    <path d="M 750 270 L 1100 270" stroke-dasharray="none"/>
     
-    <!-- Emergency exit from right stairwell -->
-    <rect x="91" y="40" width="6" height="6" fill="#c8e6c9" stroke="#4caf50" stroke-width="0.3"/>
-    <text x="94" y="43.5" text-anchor="middle" font-size="1.2" fill="#2e7d32">ÇIKIŞ</text>
+    <!-- Step 3: Turn toward right exit -->
+    <path d="M 1100 270 L 1100 350" stroke-dasharray="none"/>
+    
+    <!-- Step 4: Final approach to exit -->
+    <path d="M 1100 350 L 1300 350" stroke-dasharray="none" marker-end="url(#greenArrow)"/>
+    
+    <!-- Path markers for clarity -->
+    <circle cx="750" cy="230" r="8" fill="#00FF00" stroke="#fff" stroke-width="3"/>
+    <circle cx="750" cy="270" r="8" fill="#00FF00" stroke="#fff" stroke-width="3"/>
+    <circle cx="1100" cy="270" r="8" fill="#00FF00" stroke="#fff" stroke-width="3"/>
+    <circle cx="1100" cy="350" r="8" fill="#00FF00" stroke="#fff" stroke-width="3"/>
+    <circle cx="1300" cy="350" r="12" fill="#FF0000" stroke="#fff" stroke-width="4"/>
+    
+    <!-- Direction indicators -->
+    <text x="770" y="255" font-size="20" fill="#00AA00" font-weight="bold">⬇</text>
+    <text x="920" y="285" font-size="20" fill="#00AA00" font-weight="bold">➡</text>
+    <text x="1115" y="310" font-size="20" fill="#00AA00" font-weight="bold">⬇</text>
+    <text x="1200" y="365" font-size="20" fill="#00AA00" font-weight="bold">➡</text>
   </g>
   
   <!-- DOORS -->
-  <g id="doors" stroke="#999" stroke-width="0.2" fill="none">
-    <!-- Room doors to main corridor -->
-    <line x1="22" y1="23" x2="22" y2="25"/>
-    <line x1="31" y1="23" x2="31" y2="25"/>
-    <line x1="40" y1="23" x2="40" y2="25"/>
-    <line x1="49" y1="23" x2="49" y2="25"/>
-    <line x1="58" y1="23" x2="58" y2="25"/>
-    <line x1="67" y1="23" x2="67" y2="25"/>
-    <line x1="76" y1="23" x2="76" y2="25"/>
-    <line x1="85" y1="23" x2="85" y2="25"/>
-    <line x1="93.5" y1="23" x2="93.5" y2="25"/>
-    
-    <!-- Bottom room doors -->
-    <line x1="22" y1="31" x2="22" y2="33"/>
-    <line x1="31" y1="31" x2="31" y2="33"/>
-    <line x1="40" y1="31" x2="40" y2="33"/>
-    <line x1="49" y1="31" x2="49" y2="33"/>
-    <line x1="58" y1="31" x2="58" y2="33"/>
-    <line x1="67" y1="31" x2="67" y2="33"/>
-    <line x1="76" y1="31" x2="76" y2="33"/>
-    <line x1="85" y1="31" x2="85" y2="33"/>
-    <line x1="93.5" y1="31" x2="93.5" y2="33"/>
+  <g id="doors" stroke="#333" stroke-width="3" fill="none">
+    <!-- Top room doors to corridor -->
+    <line x1="270" y1="230" x2="270" y2="250"/>
+    <line x1="390" y1="230" x2="390" y2="250"/>
+    <line x1="510" y1="230" x2="510" y2="250"/>
+    <line x1="630" y1="230" x2="630" y2="250"/>
+    <line x1="750" y1="230" x2="750" y2="250"/>
+    <line x1="870" y1="230" x2="870" y2="250"/>
+    <line x1="990" y1="230" x2="990" y2="250"/>
+    <line x1="1110" y1="230" x2="1110" y2="250"/>
+    <line x1="1230" y1="230" x2="1230" y2="250"/>
     
     <!-- Side room doors -->
-    <line x1="25" y1="46" x2="25" y2="48"/>
-    <line x1="38" y1="46" x2="38" y2="48"/>
-    <line x1="51" y1="46" x2="51" y2="48"/>
-    <line x1="64" y1="46" x2="64" y2="48"/>
-    <line x1="77" y1="46" x2="77" y2="48"/>
-    <line x1="90.5" y1="46" x2="90.5" y2="48"/>
-  </g>
-  
-  <!-- FIRE SAFETY EQUIPMENT -->
-  <g id="fireEquipment">
-    <!-- Fire extinguishers -->
-    <circle cx="17" cy="28" r="0.8" fill="#f44336" stroke="#d32f2f" stroke-width="0.2"/>
-    <text x="17" y="28.5" text-anchor="middle" font-size="0.8" fill="#fff">🧯</text>
+    <line x1="1230" y1="370" x2="1230" y2="390"/>
+    <line x1="1180" y1="350" x2="1180" y2="370"/>
     
-    <circle cx="83" cy="28" r="0.8" fill="#f44336" stroke="#d32f2f" stroke-width="0.2"/>
-    <text x="83" y="28.5" text-anchor="middle" font-size="0.8" fill="#fff">🧯</text>
-    
-    <circle cx="50" cy="30" r="0.8" fill="#f44336" stroke="#d32f2f" stroke-width="0.2"/>
-    <text x="50" y="30.5" text-anchor="middle" font-size="0.8" fill="#fff">🧯</text>
-    
-    <!-- Emergency lighting -->
-    <rect x="8" y="24" width="2" height="1" fill="#ffeb3b" stroke="#f57c00" stroke-width="0.1"/>
-    <rect x="89" y="24" width="2" height="1" fill="#ffeb3b" stroke="#f57c00" stroke-width="0.1"/>
-  </g>
-  
-  <!-- DIRECTIONAL ARROWS -->
-  <g id="exitArrows" fill="#4caf50" font-size="2">
-    <text x="15" y="30">➡️</text>
-    <text x="88" y="30">⬇️</text>
-    <text x="50" y="30">⬅️➡️</text>
+    <!-- Left wing doors -->
+    <line x1="120" y1="280" x2="120" y2="320"/>
+    <line x1="180" y1="185" x2="200" y2="185"/>
   </g>
   
   <!-- LEGEND -->
-  <g id="legend" transform="translate(5, 60)">
-    <rect x="0" y="0" width="35" height="12" fill="rgba(255,255,255,0.9)" stroke="#ccc" stroke-width="0.1"/>
-    <text x="2" y="2" font-size="1.5" font-weight="bold" fill="#333">ACIL ÇIKIŞ PLANI</text>
+  <g id="legend" transform="translate(50, 20)">
+    <rect x="0" y="0" width="400" height="50" fill="rgba(255,255,255,0.95)" stroke="#ccc" stroke-width="2"/>
+    <text x="10" y="20" font-size="18" font-weight="bold" fill="#333">ACIL ÇIKIŞ PLANI - ODA 3412</text>
     
-    <rect x="2" y="3.5" width="2" height="1" fill="#e3f2fd" stroke="#1976d2" stroke-width="0.1"/>
-    <text x="5" y="4.3" font-size="1" fill="#666">Oda</text>
+    <rect x="10" y="25" width="20" height="10" fill="#e3f2fd" stroke="#1976d2" stroke-width="1"/>
+    <text x="35" y="35" font-size="12" fill="#666">Oda</text>
     
-    <rect x="2" y="5" width="2" height="1" fill="#c8e6c9" stroke="#4caf50" stroke-width="0.1"/>
-    <text x="5" y="5.8" font-size="1" fill="#666">Çıkış</text>
+    <rect x="80" y="25" width="20" height="10" fill="#ffcdd2" stroke="#f44336" stroke-width="1"/>
+    <text x="105" y="35" font-size="12" fill="#666">Çıkış</text>
     
-    <rect x="2" y="6.5" width="2" height="1" fill="#e9ecef" stroke="#666" stroke-width="0.1"/>
-    <text x="5" y="7.3" font-size="1" fill="#666">Merdiven</text>
-    
-    <circle cx="3" cy="9" r="0.4" fill="#f44336"/>
-    <text x="5" y="9.5" font-size="1" fill="#666">Yangın Söndürücü</text>
+    <line x1="150" y1="30" x2="180" y2="30" stroke="#00FF00" stroke-width="4" marker-end="url(#greenArrow)"/>
+    <text x="185" y="35" font-size="12" fill="#666">Yeşil Çizgi Rotası</text>
+  </g>
+  
+  <!-- START INDICATOR for Room 3412 -->
+  <g id="startIndicator" transform="translate(750, 100)">
+    <circle cx="0" cy="0" r="15" fill="#FF5722" stroke="#d84315" stroke-width="3"/>
+    <text x="0" y="6" text-anchor="middle" font-size="18" fill="#fff" font-weight="bold">START</text>
+    <text x="0" y="-25" text-anchor="middle" font-size="14" fill="#FF5722" font-weight="bold">SİZ BURADASINIZ</text>
   </g>
 </svg> 
