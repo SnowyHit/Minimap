@@ -6,6 +6,8 @@ let currentRouteInstructions = [];
 let animatedPathProgress = 0;
 let isEmergencyMode = false;
 let routeAnimationTween = null;
+let dashOffset = 0;
+let arrowPosition = { x: 0, y: 0, angle: 0 };
 
 const user = {
   x: 400,
@@ -27,11 +29,64 @@ const sensor = {
 
 // Animation settings
 const ANIMATION_SETTINGS = {
-  pathDrawDuration: 2,
+  pathDrawDuration: 3, // Faster initial path drawing
   markerBounce: 0.3,
-  routePulse: 1.5,
-  emergencyAlert: 0.8
+  routePulse: 2,
+  emergencyAlert: 1,
+  dashSpeed: 0.4, // Much slower dash animation
+  arrowSpeed: 1.2 // Much slower arrow movement
 };
+
+// Start continuous dash and arrow animations
+function startDashAnimation() {
+  gsap.to(this, {
+    duration: 1,
+    repeat: -1,
+    ease: "none",
+    onUpdate: () => {
+      dashOffset += ANIMATION_SETTINGS.dashSpeed;
+      updateArrowPosition();
+      if (currentPath.length > 0) {
+        draw();
+      }
+    }
+  });
+}
+
+// Update arrow position along the path
+function updateArrowPosition() {
+  if (currentPath.length < 2) return;
+  
+  // Only start arrow animation after path drawing is complete
+  if (animatedPathProgress < 1) {
+    return; // Don't move arrow until path is fully drawn
+  }
+  
+  const time = Date.now() * 0.001; // Convert to seconds
+  const pathLength = currentPath.length - 1;
+  const progress = ((time * ANIMATION_SETTINGS.arrowSpeed) % (pathLength * 2)) / pathLength;
+  
+  // Clamp progress between 0 and 1
+  const normalizedProgress = Math.min(1, Math.max(0, progress));
+  
+  // Calculate position along path
+  const segmentIndex = Math.floor(normalizedProgress * (currentPath.length - 1));
+  const segmentProgress = (normalizedProgress * (currentPath.length - 1)) % 1;
+  
+  if (segmentIndex < currentPath.length - 1) {
+    const startNode = rooms[currentPath[segmentIndex]];
+    const endNode = rooms[currentPath[segmentIndex + 1]];
+    
+    if (startNode && endNode) {
+      const startPos = realToCanvas(startNode.x, startNode.y);
+      const endPos = realToCanvas(endNode.x, endNode.y);
+      
+      arrowPosition.x = startPos.x + (endPos.x - startPos.x) * segmentProgress;
+      arrowPosition.y = startPos.y + (endPos.y - startPos.y) * segmentProgress;
+      arrowPosition.angle = Math.atan2(endPos.y - startPos.y, endPos.x - startPos.x);
+    }
+  }
+}
 
 // Initialize the application
 async function init() {
@@ -45,6 +100,7 @@ async function init() {
     await loadRoomData();
     setupEventListeners();
     initializeGSAPAnimations();
+    startDashAnimation();
     draw();
     console.log('✅ System initialized successfully');
   } catch (error) {
@@ -127,18 +183,18 @@ function startNavigation() {
   user.x = canvasPos.x;
   user.y = canvasPos.y;
   
-  // Animate user to position
-  gsap.to(user, {
-    duration: 1,
-    ease: "back.out(1.7)",
-    onUpdate: () => {
-      updateUI();
-      draw();
-    },
-    onComplete: () => {
-      calculateAndShowRoute();
-    }
-  });
+     // Animate user to position
+   gsap.to(user, {
+     duration: 0.5, // Faster user positioning
+     ease: "back.out(1.7)",
+     onUpdate: () => {
+       updateUI();
+       draw();
+     },
+     onComplete: () => {
+       calculateAndShowRoute();
+     }
+   });
   
   updateUI();
   console.log(`📍 Navigation started from room ${roomId}`);
@@ -454,7 +510,7 @@ function getStepIcon(type) {
   return icons[type] || '👉';
 }
 
-// Animate path drawing with GSAP
+// Enhanced path drawing animation with arrow
 function animatePathDrawing() {
   if (routeAnimationTween) {
     routeAnimationTween.kill();
@@ -470,10 +526,18 @@ function animatePathDrawing() {
       draw();
     },
     onComplete: () => {
-      // Animate markers
+      // Animate markers after path is drawn
       animateRouteMarkers();
+      // Start continuous arrow animation
+      startArrowAnimation();
     }
   });
+}
+
+// Start continuous arrow animation along the path
+function startArrowAnimation() {
+  // Arrow will move continuously with the dash animation
+  console.log('🏹 Arrow animation started');
 }
 
 // Animate route markers with bounce effect
@@ -538,25 +602,32 @@ function drawMap() {
   });
 }
 
-// Draw animated route path
+// Draw animated route path with dashed lines and moving arrow
 function drawAnimatedRoute() {
   if (currentPath.length < 2) return;
   
   ctx.save();
   
-  // Draw path with animation progress
+  // Draw path with animated dashes
   const totalSegments = currentPath.length - 1;
   const animatedSegments = animatedPathProgress * totalSegments;
   
-  ctx.beginPath();
+  // Set up dashed line style
+  const dashArray = isEmergencyMode ? [15, 10] : [20, 8];
+  ctx.setLineDash(dashArray);
+  ctx.lineDashOffset = -dashOffset; // Negative for forward animation
+  
   ctx.strokeStyle = isEmergencyMode ? '#f44336' : '#4CAF50';
-  ctx.lineWidth = 8;
+  ctx.lineWidth = 6;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   
-  // Add glow effect
+  // Add outer glow
   ctx.shadowColor = ctx.strokeStyle;
-  ctx.shadowBlur = 15;
+  ctx.shadowBlur = 20;
+  
+  // Draw the main path
+  ctx.beginPath();
   
   for (let i = 0; i < Math.floor(animatedSegments) && i < totalSegments; i++) {
     const start = rooms[currentPath[i]];
@@ -594,8 +665,89 @@ function drawAnimatedRoute() {
   
   ctx.stroke();
   
-  // Draw markers with animated scale
+  // Draw solid background line for better visibility
+  ctx.setLineDash([]); // Remove dash
   ctx.shadowBlur = 0;
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = isEmergencyMode ? 'rgba(244, 67, 54, 0.3)' : 'rgba(76, 175, 80, 0.3)';
+  ctx.stroke();
+  
+  // Draw animated arrow only after path is completely drawn
+  if (animatedPathProgress >= 1) { // Only show arrow after path is fully drawn
+    drawMovingArrow();
+  }
+  
+  // Draw markers with animated scale
+  drawRouteMarkers();
+  
+  ctx.restore();
+}
+
+// Draw the moving arrow at the tip
+function drawMovingArrow() {
+  if (currentPath.length < 2) return;
+  
+  ctx.save();
+  
+  // Position arrow
+  ctx.translate(arrowPosition.x, arrowPosition.y);
+  ctx.rotate(arrowPosition.angle);
+  
+  // Arrow design
+  const arrowSize = 25;
+  const arrowWidth = 15;
+  
+  // Arrow shadow/glow
+  ctx.shadowColor = isEmergencyMode ? '#f44336' : '#4CAF50';
+  ctx.shadowBlur = 15;
+  
+  // Draw arrow body
+  ctx.beginPath();
+  ctx.moveTo(arrowSize, 0);
+  ctx.lineTo(-arrowSize * 0.6, -arrowWidth * 0.5);
+  ctx.lineTo(-arrowSize * 0.3, 0);
+  ctx.lineTo(-arrowSize * 0.6, arrowWidth * 0.5);
+  ctx.closePath();
+  
+  // Fill arrow
+  const gradient = ctx.createLinearGradient(-arrowSize, 0, arrowSize, 0);
+  if (isEmergencyMode) {
+    gradient.addColorStop(0, '#ff5722');
+    gradient.addColorStop(1, '#f44336');
+  } else {
+    gradient.addColorStop(0, '#66bb6a');
+    gradient.addColorStop(1, '#4caf50');
+  }
+  
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  
+  // Arrow border
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2;
+  ctx.shadowBlur = 0;
+  ctx.stroke();
+  
+  // Add pulsing effect
+  const pulseScale = 1 + Math.sin(Date.now() * 0.008) * 0.2;
+  ctx.scale(pulseScale, pulseScale);
+  
+  // Inner highlight
+  ctx.beginPath();
+  ctx.moveTo(arrowSize * 0.7, 0);
+  ctx.lineTo(-arrowSize * 0.4, -arrowWidth * 0.3);
+  ctx.lineTo(-arrowSize * 0.2, 0);
+  ctx.lineTo(-arrowSize * 0.4, arrowWidth * 0.3);
+  ctx.closePath();
+  
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+// Enhanced route markers drawing
+function drawRouteMarkers() {
   currentPath.forEach((nodeId, index) => {
     const node = rooms[nodeId];
     if (!node) return;
@@ -607,30 +759,64 @@ function drawAnimatedRoute() {
     ctx.translate(canvasPos.x, canvasPos.y);
     ctx.scale(scale, scale);
     
+    // Add pulsing effect to markers
+    const pulseScale = 1 + Math.sin(Date.now() * 0.006 + index) * 0.1;
+    ctx.scale(pulseScale, pulseScale);
+    
     ctx.beginPath();
-    ctx.arc(0, 0, 8, 0, 2 * Math.PI);
+    ctx.arc(0, 0, 10, 0, 2 * Math.PI);
     
     if (node.type === 'exit') {
+      // Exit marker with special animation
+      const exitPulse = 1 + Math.sin(Date.now() * 0.01) * 0.3;
+      ctx.scale(exitPulse, exitPulse);
+      
       ctx.fillStyle = '#f44336';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      
+      // Exit icon
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🚪', 0, 0);
+      
+    } else if (index === 0) {
+      // Start marker
+      ctx.fillStyle = '#4caf50';
       ctx.fill();
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 3;
       ctx.stroke();
-    } else if (index === 0) {
-      ctx.fillStyle = '#4caf50';
-      ctx.fill();
+      
+      // Start icon
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🎯', 0, 0);
+      
     } else {
+      // Waypoint markers
       ctx.fillStyle = '#ffeb3b';
       ctx.fill();
       ctx.strokeStyle = '#f57c00';
       ctx.lineWidth = 2;
       ctx.stroke();
+      
+      // Step number
+      ctx.fillStyle = '#f57c00';
+      ctx.font = 'bold 10px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(index.toString(), 0, 0);
     }
     
     ctx.restore();
   });
-  
-  ctx.restore();
 }
 
 // Draw user with animated effects
