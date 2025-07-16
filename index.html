@@ -3,39 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Otel Yönlendirme Sistemi</title>
+  <title>Otel Yönlendirme Demo</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app">
-    <h1>Otel Yönlendirme Sistemi</h1>
-    <canvas id="mapCanvas" width="800" height="600" aria-label="Harita"></canvas>
-    <section id="infoCard" aria-label="Kullanıcı Bilgileri">
-      <div id="info">
-        <div class="info-block"><span class="info-label">Oda</span><span id="roomName">-</span></div>
-        <div class="info-block"><span class="info-label">Adım</span><span id="stepCount">0</span></div>
-        <div class="info-block"><span class="info-label">Yön</span><span id="direction">-</span></div>
-      </div>
-    </section>
-    <section id="qrInputSection">
-      <label for="roomInput">Başlangıç Odası (QR simülasyonu):</label>
-      <input type="text" id="roomInput" placeholder="ör. 3401" aria-label="Başlangıç Odası">
-      <button id="startBtn">Başla</button>
-    </section>
+    <header>
+      <img src="icon-192.png" alt="Logo" class="logo">
+      <h1>Otel Yönlendirme Demo</h1>
+    </header>
+    <div class="main-content">
+      <aside id="sidebar">
+        <h2>Odalar</h2>
+        <ul id="roomList"></ul>
+        <button class="demo-btn" id="showAllBtn">Tüm Odaları Göster</button>
+        <button class="demo-btn" id="searchBtn">Oda Ara</button>
+      </aside>
+      <section id="mapSection">
+        <canvas id="mapCanvas" width="800" height="600" aria-label="Harita"></canvas>
+      </section>
+    </div>
   </div>
-  <div id="debugPanel" style="max-width:900px;margin:20px auto 0 auto;padding:10px;background:#222;color:#fff;font-size:0.95em;border-radius:8px;min-height:60px;white-space:pre-wrap;overflow-x:auto;">
-    <b>Debug Status:</b>
-    <table id="debugStatusTable" style="width:100%;margin-top:8px;border-collapse:collapse;">
-      <tbody>
-        <tr><td>GPS Lat/Lon</td><td id="dbgGpsLatLon">-</td></tr>
-        <tr><td>GPS Canvas X/Y</td><td id="dbgGpsXY">-</td></tr>
-        <tr><td>Dead Reckoning X/Y (m)</td><td id="dbgDrXY">-</td></tr>
-        <tr><td>Predicted Movement (m)</td><td id="dbgMoveM">-</td></tr>
-        <tr><td>Movement Rotation (°)</td><td id="dbgMoveRot">-</td></tr>
-        <tr><td>Status</td><td id="dbgStatusMsg">-</td></tr>
-      </tbody>
-    </table>
+  <div id="roomModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2 id="modalRoomName">Oda Bilgisi</h2>
+      <p id="modalRoomInfo">Bu, demo amaçlı bir oda bilgisidir.</p>
+    </div>
   </div>
   <script src="app.js"></script>
 </body>
