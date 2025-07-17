@@ -129,8 +129,7 @@ async function init() {
     // Set canvas dimensions to match container
     canvas.width = containerRect.width;
     canvas.height = containerRect.height;
-    mapDisplayHeight = canvas.height;
-    
+
     // Update canvas style to fill container
     canvas.style.width = '100%';
     canvas.style.height = '100%';
@@ -643,23 +642,29 @@ function animateRouteMarkers() {
   });
 }
 
-// Enhanced drawing function with beautiful animations
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Draw animated route with green line
-  if (currentPath.length > 0) {
-    drawAnimatedRoute();
-  }
-  
-  // Draw user with pulsing effect
-  drawUser();
+// --- CAMERA OFFSET: Center map on user ---
+function getCameraOffset() {
+  return {
+    x: canvas.width / 2 - user.x,
+    y: canvas.height / 2 - user.y
+  };
 }
 
-// Draw animated route path with dashed green lines and moving arrow
-function drawAnimatedRoute() {
+// --- MODIFIED DRAW FUNCTION ---
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const camera = getCameraOffset();
+  // Draw animated route with green line
+  if (currentPath.length > 0) {
+    drawAnimatedRoute(camera);
+  }
+  // Draw user with pulsing effect (user always at center)
+  drawUser(camera);
+}
+
+// --- MODIFIED drawAnimatedRoute ---
+function drawAnimatedRoute(camera) {
   if (currentPath.length < 2) return;
-  
   ctx.save();
   
   // Draw path with animated dashes
@@ -694,9 +699,9 @@ function drawAnimatedRoute() {
     const endPos = realToCanvas(end.x, end.y);
     
     if (i === 0) {
-      ctx.moveTo(startPos.x, startPos.y);
+      ctx.moveTo(startPos.x + camera.x, startPos.y + camera.y);
     }
-    ctx.lineTo(endPos.x, endPos.y);
+    ctx.lineTo(endPos.x + camera.x, endPos.y + camera.y);
   }
   
   // Draw partial segment if needed
@@ -714,7 +719,7 @@ function drawAnimatedRoute() {
       const currentX = startPos.x + (endPos.x - startPos.x) * segmentProgress;
       const currentY = startPos.y + (endPos.y - startPos.y) * segmentProgress;
       
-      ctx.lineTo(currentX, currentY);
+      ctx.lineTo(currentX + camera.x, currentY + camera.y);
     }
   }
   
@@ -729,11 +734,11 @@ function drawAnimatedRoute() {
   
   // Draw animated arrow only after path is completely drawn
   if (animatedPathProgress >= 1) { // Only show arrow after path is fully drawn
-    drawMovingArrow();
+    drawMovingArrow(camera);
   }
   
   // Draw markers with animated scale
-  drawRouteMarkers();
+  drawRouteMarkers(camera);
   
   ctx.restore();
 }
@@ -741,13 +746,13 @@ function drawAnimatedRoute() {
 // Simplified function - now handled in drawGreenLineRoute()
 
 // Draw the moving arrow at the tip
-function drawMovingArrow() {
+function drawMovingArrow(camera) {
   if (currentPath.length < 2) return;
   
   ctx.save();
   
   // Position arrow
-  ctx.translate(arrowPosition.x, arrowPosition.y);
+  ctx.translate(arrowPosition.x + camera.x, arrowPosition.y + camera.y);
   ctx.rotate(arrowPosition.angle);
   
   // Arrow design
@@ -804,7 +809,7 @@ function drawMovingArrow() {
 }
 
 // Enhanced route markers drawing
-function drawRouteMarkers() {
+function drawRouteMarkers(camera) {
   currentPath.forEach((nodeId, index) => {
     const node = rooms[nodeId];
     if (!node) return;
@@ -813,7 +818,7 @@ function drawRouteMarkers() {
     const scale = node._animScale || 1;
     
     ctx.save();
-    ctx.translate(canvasPos.x, canvasPos.y);
+    ctx.translate(canvasPos.x + camera.x, canvasPos.y + camera.y);
     ctx.scale(scale, scale);
     
     // Add pulsing effect to markers
@@ -877,13 +882,13 @@ function drawRouteMarkers() {
 }
 
 // Draw user with animated effects
-function drawUser() {
+function drawUser(camera) {
   ctx.save();
   
   // Pulsing effect for user
   const pulseScale = 1 + Math.sin(Date.now() * 0.005) * 0.1;
   
-  ctx.translate(user.x, user.y);
+  ctx.translate(canvas.width / 2, canvas.height / 2); // Always center
   ctx.scale(pulseScale, pulseScale);
   
   // User circle

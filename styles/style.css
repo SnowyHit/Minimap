@@ -8,7 +8,6 @@ body {
 }
 
 #app {
-  max-width: 1200px;
   margin: 0 auto;
   background: white;
   border-radius: 15px;
@@ -38,27 +37,35 @@ h1 {
   to { color: #ff5722; }
 }
 
+/* --- MAP CONTAINER: Revert to previous --- */
 .map-container {
   position: relative;
   width: 100%;
-  max-width: 1000px;
-  /* Maintain original floor-plan aspect ratio (1350x500 ≈ 27/10) */
-  aspect-ratio: 1350 / 500;
+  height: 50vh;
   margin: 0 auto 20px;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
+  background: #111;
 }
-
-#mapCanvas {
-  display: block;
-  background: transparent;
+body[data-theme="dark"] .map-container {
+  background: #181a20;
 }
-
-#mapImage {
+#mapImage, #mapCanvas {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  object-fit: contain;
+  border-radius: 0;
   display: block;
-  object-fit: cover;
+}
+@media (max-width: 768px) {
+  .map-container {
+    height: 50vh;
+    min-height: 120px;
+    max-height: 100vw;
+    margin-bottom: 16px;
+  }
 }
 
 /* Enhanced Info Card */
@@ -346,8 +353,6 @@ h1 {
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-radius: 15px;
   margin: 20px auto 0 auto;
-  width: 100%;
-  max-width: 1000px;
   border: 2px solid #dee2e6;
 }
 
@@ -573,22 +578,80 @@ body[data-theme="dark"] .emergency-btn {
   display: none !important;
 } 
 
-/* Header with centered title and left logo */
+/* --- HEADER: Improved spacing, bigger logo, theme toggle right --- */
 .header-wrapper {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  width: 100%;
+  min-height: 80px;
+  padding: 18px 0 18px 0;
+  position: relative;
+  background: transparent;
+  border-bottom: 2px solid #eee;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 28px;
+  margin-top: 10px;
 }
-
-.header-wrapper .hotel-logo {
-  position: absolute;
-  left: 0;
-  height: 60px;
+.hotel-logo {
+  height: 64px;
   width: auto;
+  margin-right: 24px;
+  margin-left: 18px;
+  flex-shrink: 0;
+  display: block;
 }
-
 .header-wrapper h1 {
+  flex: 1;
+  text-align: center;
   margin: 0;
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #d32f2f;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+.theme-toggle {
+  position: static;
+  margin-left: auto;
+  margin-right: 24px;
+  background: rgba(255,255,255,0.8);
+  border: none;
+  outline: none;
+  font-size: 1.3em;
+  padding: 12px 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+  z-index: 1;
+  align-self: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.theme-toggle:hover {
+  transform: scale(1.1);
+}
+body[data-theme="dark"] .theme-toggle {
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+}
+@media (max-width: 768px) {
+  .header-wrapper {
+    min-height: 56px;
+    padding: 10px 0 10px 0;
+    margin-bottom: 16px;
+    margin-top: 4px;
+  }
+  .hotel-logo {
+    height: 40px;
+    margin-right: 10px;
+    margin-left: 6px;
+  }
+  .header-wrapper h1 {
+    font-size: 1.1em;
+  }
+  .theme-toggle {
+    font-size: 1em;
+    margin-right: 8px;
+    padding: 8px 10px;
+  }
 } 

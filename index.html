@@ -10,15 +10,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body data-theme="dark">
-  <button id="themeToggle" class="theme-toggle" aria-label="Tema Değiştir">🌙</button>
+  <div class="header-wrapper">
+    <img src="otel-logo.png" alt="Grand Yazıcı Logo" class="hotel-logo">
+    <h1>🚨 Acil Durum Çıkış Planı - Oda 3412</h1>
+    <button id="themeToggle" class="theme-toggle" aria-label="Tema Değiştir">🌙</button>
+  </div>
   <div id="app">
-    <div class="header-wrapper">
-      <img src="otel-logo.png" alt="Grand Yazıcı Logo" class="hotel-logo">
-      <h1>🚨 Acil Durum Çıkış Planı - Oda 3412</h1>
-    </div>
-    <div class="map-container" style="position: relative; width: 100%; max-width: 1000px; margin: 0 auto; border: 2px solid #ddd; border-radius: 8px; overflow: hidden;">
-      <img id="mapImage" src="floor-plan.png" alt="Kat Planı - Oda 3412 Yeşil Çizgi Rotası" style="width: 100%; height: auto; display: block; z-index: 1;">
-      <canvas id="mapCanvas" aria-label="Harita" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background: transparent; pointer-events: none;"></canvas>
+    <div class="map-container">
+      <img id="mapImage" src="floor-plan.png" alt="Kat Planı - Oda 3412 Yeşil Çizgi Rotası">
+      <canvas id="mapCanvas" aria-label="Harita"></canvas>
     </div>
     
     <!-- Simplified Info Card for Room 3412 -->
