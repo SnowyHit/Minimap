@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grid Map Editor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h2 {
+      font-size: 2.5rem;
+      font-weight: 300;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      padding: 30px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .control-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .control-group {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .control-group h3 {
+      color: #495057;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .input-group label {
+      font-weight: 500;
+      color: #495057;
+      min-width: 80px;
+    }
+
+    .input-group input, .input-group select {
+      padding: 10px 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .input-group input:focus, .input-group select:focus {
+      outline: none;
+      border-color: #4facfe;
+      box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-input-wrapper .btn {
+      pointer-events: none;
+    }
+
+    .workspace {
+      padding: 30px;
+      background: #f8f9fa;
+      min-height: 500px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    #grid-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      background: transparent;
+    }
+
+    #grid {
+      display: grid;
+      gap: 1px;
+      position: relative;
+      background: transparent;
+    }
+
+    .cell {
+      border: none;
+      background-color: rgba(255, 255, 255, 0.8);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .cell:hover {
+      background-color: rgba(79, 172, 254, 0.3);
+    }
+
+    #bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      pointer-events: none;
+      border: 2px solid red;
+    }
+
+    .status-bar {
+      background: #495057;
+      color: white;
+      padding: 15px 30px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-info {
+      display: flex;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .header h2 {
+        font-size: 2rem;
+      }
+      
+      .control-section {
+        grid-template-columns: 1fr;
+      }
+      
+      .input-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .input-group label {
+        min-width: auto;
+      }
+      
+      .workspace {
+        padding: 15px;
+      }
+      
+      .status-bar {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        padding: 20px;
+      }
+      
+      .controls {
+        padding: 20px;
+      }
+      
+      .control-group {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h2>Grid Map Editor</h2>
+    <p>Create and edit grid-based maps with ease</p>
+  </div>
+
+  <div class="controls">
+    <div class="control-section">
+      <div class="control-group">
+        <h3>Grid Settings</h3>
+        <div class="input-group">
+          <label>Rows:</label>
+          <input type="number" id="rows" value="10" min="1">
+        </div>
+        <div class="input-group">
+          <label>Columns:</label>
+          <input type="number" id="cols" value="10" min="1">
+        </div>
+        <div class="input-group">
+          <label>Cell Size (cm):</label>
+          <input type="number" id="cellSizeCm" value="50" min="1" step="0.1">
+        </div>
+        <button class="btn" onclick="createGrid()">Create Grid</button>
+      </div>
+
+      <div class="control-group">
+        <h3>Labels</h3>
+        <div class="input-group">
+          <label>New Label:</label>
+          <input type="text" id="newLabel" placeholder="Enter label name">
+        </div>
+        <button class="btn" onclick="addLabel()">Add Label</button>
+        <div class="input-group">
+          <label>Select:</label>
+          <select id="labelSelector">
+            <option value="">-- Select Label --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <h3>Import/Export</h3>
+        <div class="input-group">
+          <label>Import:</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="jsonImport" accept=".json">
+            <button class="btn btn-secondary">Choose JSON File</button>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="exportJSON()">Export JSON</button>
+      </div>
+
+      <div class="control-group">
+        <h3>Reference Image</h3>
+        <div class="input-group">
+          <label>Image:</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="imageInput" accept="image/*">
+            <button class="btn btn-secondary">Choose Image</button>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="toggleGrid()" id="toggleBtn">Hide Grid</button>
+        <button class="btn btn-secondary" onclick="testImage()">Test Image</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div id="grid-container">
+      <img id="bg" />
+      <div id="grid"></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-info">
+      <span id="gridInfo">Grid: 10×10</span>
+      <span id="cellInfo">Cell Size: 25px</span>
+      <span id="labelInfo">Labels: 0</span>
+      <span id="dragInfo">Mode: Click</span>
+      <span id="imageInfo">No Image</span>
+      <span id="undoInfo">Undo: 0 steps</span>
+    </div>
+    <div class="status-info">
+      <span id="instructions">Click or drag to label • Shift+click or Shift+drag to clear • Ctrl+Z to undo</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let labels = {};
+  let gridData = [];
+  let activeLabel = '';
+  let isDragging = false;
+  let dragMode = 'draw'; // 'draw' or 'delete'
+  
+  // Undo system
+  let undoStack = [];
+  let maxUndoSteps = 50; // Maximum number of undo steps to keep in memory
+  
+  // Grid dimensions
+  let cellSizeCm = 50; // Real-life cell size in centimeters
+  
+  const gridElem = document.getElementById('grid');
+  const labelSelector = document.getElementById('labelSelector');
+
+  function generateRandomColor() {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 70%, 70%)`;
+  }
+
+  // Undo system functions
+  function saveState() {
+    // Create a deep copy of the current grid state
+    const currentState = {
+      gridData: JSON.parse(JSON.stringify(gridData)),
+      timestamp: Date.now()
+    };
+    
+    // Add to undo stack
+    undoStack.push(currentState);
+    
+    // Limit the size of undo stack
+    if (undoStack.length > maxUndoSteps) {
+      undoStack.shift();
+    }
+    
+    updateUndoStatus();
+  }
+
+  function undo() {
+    if (undoStack.length === 0) {
+      console.log('Nothing to undo');
+      return;
+    }
+    
+    const previousState = undoStack.pop();
+    gridData = JSON.parse(JSON.stringify(previousState.gridData));
+    
+    // Update the visual grid
+    updateGridVisuals();
+    updateUndoStatus();
+    
+    console.log('Undo performed');
+  }
+
+  function updateGridVisuals() {
+    const cells = gridElem.children;
+    for (let y = 0; y < gridData.length; y++) {
+      for (let x = 0; x < gridData[y].length; x++) {
+        const cellIndex = y * gridData[y].length + x;
+        const cell = cells[cellIndex];
+        if (cell) {
+          const label = gridData[y][x];
+          if (label) {
+            cell.style.backgroundColor = labels[label];
+            cell.dataset.label = label;
+          } else {
+            cell.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            cell.dataset.label = '';
+          }
+        }
+      }
+    }
+  }
+
+  function updateUndoStatus() {
+    const undoInfo = document.getElementById('undoInfo');
+    if (undoInfo) {
+      undoInfo.textContent = `Undo: ${undoStack.length} steps`;
+    }
+  }
+
+  function clearUndoStack() {
+    undoStack = [];
+    updateUndoStatus();
+  }
+
+
+
+  function addLabel() {
+    const label = document.getElementById('newLabel').value.trim();
+    if (!label || labels[label]) return;
+    labels[label] = generateRandomColor();
+    const opt = document.createElement('option');
+    opt.value = label;
+    opt.textContent = label;
+    labelSelector.appendChild(opt);
+    document.getElementById('newLabel').value = '';
+    
+    // Update status bar
+    const labelCount = Object.keys(labels).length;
+    document.getElementById('labelInfo').textContent = `Labels: ${labelCount}`;
+  }
+
+  labelSelector.addEventListener('change', () => {
+    activeLabel = labelSelector.value;
+  });
+
+  // Stop dragging when mouse is released anywhere on the page
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    updateDragModeIndicator();
+  });
+
+  // Keyboard event listener for Ctrl+Z
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      e.preventDefault();
+      undo();
+    }
+  });
+
+  function updateDragModeIndicator() {
+    const dragInfo = document.getElementById('dragInfo');
+    if (isDragging) {
+      dragInfo.textContent = `Mode: ${dragMode === 'draw' ? 'Drawing' : 'Deleting'}`;
+    } else {
+      dragInfo.textContent = 'Mode: Click';
+    }
+  }
+
+  function testImage() {
+    const bgImg = document.getElementById('bg');
+    console.log('Image element:', bgImg);
+    console.log('Image src:', bgImg.src);
+    console.log('Image style:', bgImg.style.cssText);
+    console.log('Image dimensions:', bgImg.offsetWidth, 'x', bgImg.offsetHeight);
+    console.log('Image natural dimensions:', bgImg.naturalWidth, 'x', bgImg.naturalHeight);
+    console.log('Image visible:', bgImg.offsetWidth > 0 && bgImg.offsetHeight > 0);
+  }
+
+  function createGrid() {
+    const rows = +document.getElementById('rows').value;
+    const cols = +document.getElementById('cols').value;
+    cellSizeCm = +document.getElementById('cellSizeCm').value;
+    
+    // Calculate dynamic cell size based on grid dimensions
+    let cellSize = 25;
+    if (rows > 20 || cols > 20) cellSize = 20;
+    if (rows > 40 || cols > 40) cellSize = 15;
+    if (rows > 60 || cols > 60) cellSize = 10;
+    if (rows > 80 || cols > 80) cellSize = 8;
+    
+    gridElem.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+    gridElem.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+    
+    // Set grid container and background image size to match grid
+    const gridWidth = cols * cellSize;
+    const gridHeight = rows * cellSize;
+    document.getElementById('grid-container').style.width = gridWidth + 'px';
+    document.getElementById('grid-container').style.height = gridHeight + 'px';
+    
+    // Resize background image if it exists
+    const bgImg = document.getElementById('bg');
+    if (bgImg.src && bgImg.src !== window.location.href) {
+      bgImg.style.width = gridWidth + 'px';
+      bgImg.style.height = gridHeight + 'px';
+      console.log('Background image resized to match new grid:', gridWidth, 'x', gridHeight);
+    }
+    
+    // Calculate real-life dimensions
+    const realWidth = (cols * cellSizeCm / 100).toFixed(1); // Convert to meters
+    const realHeight = (rows * cellSizeCm / 100).toFixed(1); // Convert to meters
+    
+    // Update status bar
+    document.getElementById('gridInfo').textContent = `Grid: ${cols}×${rows}`;
+    document.getElementById('cellInfo').textContent = `Cell: ${cellSize}px (${cellSizeCm}cm) | Total: ${realWidth}×${realHeight}m`;
+    
+    gridElem.innerHTML = '';
+    gridData = [];
+    
+    // Clear undo stack when creating a new grid
+    clearUndoStack();
+
+    for (let y = 0; y < rows; y++) {
+      gridData[y] = [];
+      for (let x = 0; x < cols; x++) {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.dataset.x = x;
+        div.dataset.y = y;
+        div.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        div.onclick = (e) => {
+          console.log('Cell clicked:', x, y, 'Active label:', activeLabel, 'Shift:', e.shiftKey);
+          
+          // Save state before making changes
+          saveState();
+          
+          if (e.shiftKey) {
+            div.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            div.dataset.label = '';
+            gridData[y][x] = null;
+            console.log('Cell cleared');
+          } else if (activeLabel) {
+            div.style.backgroundColor = labels[activeLabel];
+            div.dataset.label = activeLabel;
+            gridData[y][x] = activeLabel;
+            console.log('Cell labeled with:', activeLabel, 'Color:', labels[activeLabel]);
+          } else {
+            console.log('No active label selected');
+          }
+        };
+
+        // Mouse down event for drag start
+        div.onmousedown = (e) => {
+          isDragging = true;
+          
+          // Save state before starting drag operation
+          saveState();
+          
+          if (e.shiftKey) {
+            dragMode = 'delete';
+            div.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            div.dataset.label = '';
+            gridData[y][x] = null;
+          } else if (activeLabel) {
+            dragMode = 'draw';
+            div.style.backgroundColor = labels[activeLabel];
+            div.dataset.label = activeLabel;
+            gridData[y][x] = activeLabel;
+          }
+          updateDragModeIndicator();
+        };
+
+        // Mouse enter event for drag painting
+        div.onmouseenter = (e) => {
+          if (isDragging) {
+            if (dragMode === 'delete') {
+              div.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+              div.dataset.label = '';
+              gridData[y][x] = null;
+            } else if (dragMode === 'draw' && activeLabel) {
+              div.style.backgroundColor = labels[activeLabel];
+              div.dataset.label = activeLabel;
+              gridData[y][x] = activeLabel;
+            }
+          }
+        };
+        gridElem.appendChild(div);
+        gridData[y][x] = null;
+      }
+    }
+  }
+
+  function exportJSON() {
+    const rows = +document.getElementById('rows').value;
+    const cols = +document.getElementById('cols').value;
+    const output = {
+      labels,
+      gridSize: { rows, cols, cellSizeCm },
+      grid: []
+    };
+    for (let y = 0; y < gridData.length; y++) {
+      for (let x = 0; x < gridData[y].length; x++) {
+        if (gridData[y][x]) {
+          output.grid.push({ grid: [x, y], label: gridData[y][x] });
+        }
+      }
+    }
+    const blob = new Blob([JSON.stringify(output, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'grid-map.json';
+    a.click();
+  }
+
+  document.getElementById('jsonImport').addEventListener('change', function () {
+    const file = this.files[0];
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const json = JSON.parse(e.target.result);
+      labels = json.labels || {};
+      for (const label in labels) {
+        if (!Array.from(labelSelector.options).find(opt => opt.value === label)) {
+          const opt = document.createElement('option');
+          opt.value = label;
+          opt.textContent = label;
+          labelSelector.appendChild(opt);
+        }
+      }
+
+      // Use saved grid size if available, otherwise calculate from data
+      let maxX, maxY;
+      if (json.gridSize) {
+        maxX = json.gridSize.cols;
+        maxY = json.gridSize.rows;
+        // Load cell size if available, otherwise use default
+        if (json.gridSize.cellSizeCm) {
+          document.getElementById('cellSizeCm').value = json.gridSize.cellSizeCm;
+        }
+      } else {
+        maxX = Math.max(...json.grid.map(p => p.grid[0])) + 1;
+        maxY = Math.max(...json.grid.map(p => p.grid[1])) + 1;
+      }
+      document.getElementById('cols').value = maxX;
+      document.getElementById('rows').value = maxY;
+      createGrid();
+      
+      // Clear undo stack after loading
+      clearUndoStack();
+
+      json.grid.forEach(({ grid: [x, y], label }) => {
+        const idx = y * maxX + x;
+        const cell = gridElem.children[idx];
+        if (cell) {
+          cell.style.backgroundColor = labels[label] || '#ccc';
+          cell.dataset.label = label;
+          gridData[y][x] = label;
+        }
+      });
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('imageInput').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    
+    console.log('File selected:', file.name, file.type, file.size);
+    
+    const url = URL.createObjectURL(file);
+    const bgImg = document.getElementById('bg');
+    
+    console.log('Setting image src to:', url);
+    
+    bgImg.onload = function() {
+      console.log('Background image loaded successfully');
+      console.log('Image natural size:', bgImg.naturalWidth, 'x', bgImg.naturalHeight);
+      
+      // Ensure the image is resized to match the current grid
+      const rows = +document.getElementById('rows').value;
+      const cols = +document.getElementById('cols').value;
+      let cellSize = 25;
+      if (rows > 20 || cols > 20) cellSize = 20;
+      if (rows > 40 || cols > 40) cellSize = 15;
+      if (rows > 60 || cols > 60) cellSize = 10;
+      if (rows > 80 || cols > 80) cellSize = 8;
+      
+      const gridWidth = cols * cellSize;
+      const gridHeight = rows * cellSize;
+      
+      bgImg.style.width = gridWidth + 'px';
+      bgImg.style.height = gridHeight + 'px';
+      
+      console.log('Image resized to:', gridWidth, 'x', gridHeight);
+      console.log('Image current style:', bgImg.style.width, 'x', bgImg.style.height);
+      
+      // Update status bar
+      document.getElementById('imageInfo').textContent = `Image: ${file.name}`;
+      
+      // Force a repaint
+      bgImg.style.display = 'none';
+      setTimeout(() => {
+        bgImg.style.display = 'block';
+      }, 10);
+    };
+    
+    bgImg.onerror = function() {
+      console.error('Failed to load background image');
+      document.getElementById('imageInfo').textContent = 'Image: Error loading';
+    };
+    
+    bgImg.src = url;
+  });
+
+  function toggleGrid() {
+    const grid = document.getElementById('grid');
+    const toggleBtn = document.getElementById('toggleBtn');
+    if (grid.style.display === 'none') {
+      grid.style.display = 'grid';
+      toggleBtn.textContent = 'Hide Grid';
+    } else {
+      grid.style.display = 'none';
+      toggleBtn.textContent = 'Show Grid';
+    }
+  }
+
+  createGrid(); // Initial grid
+  
+  // Update initial status bar
+  document.getElementById('labelInfo').textContent = `Labels: ${Object.keys(labels).length}`;
+  document.getElementById('cellSizeCm').value = cellSizeCm;
+</script>
+
+</body>
+</html>
