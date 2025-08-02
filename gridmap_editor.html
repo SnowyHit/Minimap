@@ -628,14 +628,20 @@
     reader.onload = function (e) {
       const json = JSON.parse(e.target.result);
       labels = json.labels || {};
+      
+      // Clear existing options except the default one
+      labelSelector.innerHTML = '<option value="">-- Select Label --</option>';
+      
+      // Add all labels from the imported file
       for (const label in labels) {
-        if (!Array.from(labelSelector.options).find(opt => opt.value === label)) {
-          const opt = document.createElement('option');
-          opt.value = label;
-          opt.textContent = label;
-          labelSelector.appendChild(opt);
-        }
+        const opt = document.createElement('option');
+        opt.value = label;
+        opt.textContent = label;
+        labelSelector.appendChild(opt);
       }
+      
+      // Update the label count in status bar
+      document.getElementById('labelInfo').textContent = `Labels: ${Object.keys(labels).length}`;
 
       // Use saved grid size if available, otherwise calculate from data
       let maxX, maxY;
