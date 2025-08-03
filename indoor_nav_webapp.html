@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Indoor Navigation</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f5f5f5;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #ccc;
+    }
+    #scanButton {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <button id="scanButton">Start BLE Scan</button>
+  <canvas id="mapCanvas"></canvas>
+
+  <script>
+    let beacons = [];
+    let grid = [];
+    let labels = {};
+    let gridSize = {};
+    let userPos = null;
+
+    async function loadMap() {
+      try {
+        const response = await fetch('HomeWithBeacons.json');
+        const data = await response.json();
+        beacons = data.beacons || [];
+        grid = data.grid;
+        labels = data.labels;
+        gridSize = data.gridSize;
+
+        const canvas = document.getElementById('mapCanvas');
+        canvas.width = gridSize.cols * gridSize.cellSizeCm;
+        canvas.height = gridSize.rows * gridSize.cellSizeCm;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const start = urlParams.get("start");
+        if (start) {
+          const [x, y] = start.split(',').map(Number);
+          if (!isNaN(x) && !isNaN(y)) {
+            userPos = { x, y };
+          }
+        }
+
+        drawMap();
+      } catch (err) {
+        alert("Failed to load map: " + err);
+      }
+    }
+
+    function drawMap() {
+      const canvas = document.getElementById('mapCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cellSize = gridSize.cellSizeCm;
+
+      grid.forEach(cell => {
+        const [x, y] = cell.grid;
+        const label = cell.label;
+        ctx.fillStyle = labels[label] || '#ddd';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      });
+
+      // Draw beacons
+      beacons.forEach(b => {
+        const [x, y] = b.grid;
+        ctx.fillStyle = 'blue';
+        ctx.beginPath();
+        ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      // Draw user position
+      if (userPos) {
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(userPos.x * cellSize + cellSize / 2, userPos.y * cellSize + cellSize / 2, cellSize / 2, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+
+    function estimatePosition(scans) {
+      let sumX = 0, sumY = 0, totalWeight = 0;
+      scans.forEach(scan => {
+        const match = beacons.find(b => b.major === scan.major && b.minor === scan.minor);
+        if (match) {
+          const [x, y] = match.grid;
+          const weight = 1 / Math.pow(scan.rssi + 100, 2); // simplistic RSSI weighting
+          sumX += x * weight;
+          sumY += y * weight;
+          totalWeight += weight;
+        }
+      });
+      if (totalWeight > 0) {
+        userPos = {
+          x: sumX / totalWeight,
+          y: sumY / totalWeight
+        };
+        drawMap();
+      }
+    }
+
+    async function startBLEScan() {
+      try {
+        const options = { acceptAllAdvertisements: true };
+        const scan = await navigator.bluetooth.requestLEScan(options);
+
+        navigator.bluetooth.addEventListener('advertisementreceived', event => {
+          const rssi = event.rssi;
+          const data = event.manufacturerData.get(0x004C);
+          if (data) {
+            const major = data.getUint16(2);
+            const minor = data.getUint16(4);
+            estimatePosition([{ major, minor, rssi }]);
+          }
+        });
+      } catch (e) {
+        alert('BLE scan failed: ' + e);
+      }
+    }
+
+    document.getElementById('scanButton').addEventListener('click', startBLEScan);
+
+    window.onload = loadMap;
+  </script>
+</body>
+</html>

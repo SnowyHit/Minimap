@@ -318,6 +318,22 @@
         <button class="btn btn-secondary" onclick="toggleGrid()" id="toggleBtn">Hide Grid</button>
         <button class="btn btn-secondary" onclick="testImage()">Test Image</button>
       </div>
+      <div class="control-group">
+        <h3>Beacon Placement</h3>
+        <div class="input-group">
+          <label>ID:</label>
+          <input type="text" id="beaconId" placeholder="beacon1">
+        </div>
+        <div class="input-group">
+          <label>Major:</label>
+          <input type="number" id="beaconMajor" placeholder="100">
+        </div>
+        <div class="input-group">
+          <label>Minor:</label>
+          <input type="number" id="beaconMinor" placeholder="200">
+        </div>
+        <button class="btn" onclick="toggleBeaconMode()" id="beaconToggleBtn">Beacon Mode: Off</button>
+      </div>
     </div>
   </div>
 
@@ -349,7 +365,8 @@
   let activeLabel = '';
   let isDragging = false;
   let dragMode = 'draw'; // 'draw' or 'delete'
-  
+  let beaconMode = false;
+  let beaconData = [];
   // Undo system
   let undoStack = [];
   let maxUndoSteps = 50; // Maximum number of undo steps to keep in memory
@@ -358,7 +375,14 @@
   let cellSizeCm = 50; // Real-life cell size in centimeters
   
   const gridElem = document.getElementById('grid');
+
   const labelSelector = document.getElementById('labelSelector');
+  function toggleBeaconMode() {
+    beaconMode = !beaconMode;
+    const btn = document.getElementById('beaconToggleBtn');
+    btn.textContent = `Beacon Mode: ${beaconMode ? 'On' : 'Off'}`;
+    btn.style.background = beaconMode ? '#f44336' : '';
+  }
 
   function generateRandomColor() {
     const hue = Math.floor(Math.random() * 360);
@@ -525,6 +549,7 @@
     
     gridElem.innerHTML = '';
     gridData = [];
+    beaconData = [];
     
     // Clear undo stack when creating a new grid
     clearUndoStack();
@@ -556,6 +581,27 @@
           } else {
             console.log('No active label selected');
           }
+          if (beaconMode) {
+          const id = document.getElementById('beaconId').value.trim();
+          const major = +document.getElementById('beaconMajor').value;
+          const minor = +document.getElementById('beaconMinor').value;
+          if (!id) {
+            alert('Beacon ID required!');
+            return;
+          }
+
+          beaconData.push({
+            id,
+            major,
+            minor,
+            position: [x, y]
+          });
+
+          div.style.border = '2px solid red'; // visual indicator
+          console.log(`Beacon placed at (${x}, ${y}):`, id, major, minor);
+          return; // Skip normal label behavior
+        }
+
         };
 
         // Mouse down event for drag start
@@ -603,10 +649,11 @@
     const rows = +document.getElementById('rows').value;
     const cols = +document.getElementById('cols').value;
     const output = {
-      labels,
-      gridSize: { rows, cols, cellSizeCm },
-      grid: []
-    };
+        labels,
+        gridSize: { rows, cols, cellSizeCm },
+        grid: [],
+        beacons: beaconData
+      };  
     for (let y = 0; y < gridData.length; y++) {
       for (let x = 0; x < gridData[y].length; x++) {
         if (gridData[y][x]) {
@@ -658,11 +705,20 @@
       }
       document.getElementById('cols').value = maxX;
       document.getElementById('rows').value = maxY;
+     
       createGrid();
       
       // Clear undo stack after loading
       clearUndoStack();
+      beaconData = json.beacons || [];
 
+      beaconData.forEach(({ position: [x, y] }) => {
+        const idx = y * maxX + x;
+        const cell = gridElem.children[idx];
+        if (cell) {
+          cell.style.border = '2px solid red';
+        }
+      });
       json.grid.forEach(({ grid: [x, y], label }) => {
         const idx = y * maxX + x;
         const cell = gridElem.children[idx];
